@@ -1,28 +1,39 @@
-import { BookOpenCheck, Bookmark, Stethoscope, Target } from "lucide-react";
-import {
-  challenges,
-  courses,
-  recentRepairCases,
-  recommendedLessons,
-  sampleProgress,
-  sampleStats,
-} from "@/data/sample";
+import { Bookmark, Stethoscope, Target } from "lucide-react";
+import { challenges, recentRepairCases, sampleStats } from "@/data/sample";
+import { courses, getCourse, getCourseLessons, lessonHref, publishedLessons } from "@/data/learning";
 import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Panel } from "@/components/ui/Panel";
 import { StatTile } from "@/components/dashboard/StatTile";
-import { CourseProgressList } from "@/components/dashboard/CourseProgressList";
 import { ExplorerPreview } from "@/components/dashboard/ExplorerPreview";
-import {
-  ChallengeList,
-  LessonList,
-  RepairCaseList,
-} from "@/components/dashboard/DashboardLists";
+import { ChallengeList, RepairCaseList } from "@/components/dashboard/DashboardLists";
 import { ConfidenceLegend } from "@/components/dashboard/ConfidenceLegend";
+import {
+  LearningPathList,
+  LessonsCompletedTile,
+  RecommendedLessons,
+  type CourseSummary,
+  type LessonLink,
+} from "@/components/dashboard/DashboardLearning";
 
 export default function DashboardPage() {
-  const totalLessons = courses.reduce((sum, c) => sum + c.lessonCount, 0);
-  const completedLessons = Object.values(sampleProgress).reduce((a, b) => a + b, 0);
+  const courseSummaries: CourseSummary[] = courses.map((course) => {
+    const lessons = getCourseLessons(course.id);
+    return {
+      id: course.id,
+      order: course.order,
+      title: course.title,
+      publishedIds: lessons.filter((l) => l.status === "published").map((l) => l.id),
+    };
+  });
+
+  const lessonLinks: LessonLink[] = publishedLessons.map((l) => ({
+    id: l.id,
+    href: lessonHref(l),
+    title: l.title,
+    courseTitle: getCourse(l.courseId)?.title ?? "",
+    minutes: l.minutes,
+  }));
 
   return (
     <>
@@ -30,39 +41,35 @@ export default function DashboardPage() {
         eyebrow="Dashboard"
         title="Welcome back"
         description="Pick up where you left off, or try a diagnostic challenge."
-      >
-        <Badge tone="caution">Sample data</Badge>
-      </PageHeader>
+      />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile
-          icon={BookOpenCheck}
-          label="Lessons completed"
-          value={`${completedLessons}/${totalLessons}`}
-          detail={`${Math.round((completedLessons / totalLessons) * 100)}% of the curriculum`}
-        />
-        <StatTile icon={Stethoscope} label="Challenges solved" value={String(sampleStats.challengesSolved)} />
-        <StatTile icon={Target} label="Average score" value={`${sampleStats.averageScore}%`} detail="Diagnostic game" />
-        <StatTile icon={Bookmark} label="Saved cases" value={String(sampleStats.savedCases)} />
+        <LessonsCompletedTile publishedIds={publishedLessons.map((l) => l.id)} />
+        <StatTile icon={Stethoscope} label="Challenges solved" value={String(sampleStats.challengesSolved)} detail="Sample data" />
+        <StatTile icon={Target} label="Average score" value={`${sampleStats.averageScore}%`} detail="Sample data" />
+        <StatTile icon={Bookmark} label="Saved cases" value={String(sampleStats.savedCases)} detail="Sample data" />
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <Panel
           title="Learning path"
-          description="Eight courses, from fundamentals to practical diagnosis"
+          description="Your progress across the eight courses"
           action={{ href: "/learn", label: "All courses" }}
           className="lg:col-span-2"
         >
-          <CourseProgressList courses={courses} progress={sampleProgress} />
+          <LearningPathList courses={courseSummaries} />
         </Panel>
         <ExplorerPreview />
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Panel title="Recommended lessons" action={{ href: "/learn", label: "Learn" }}>
-          <LessonList lessons={recommendedLessons} courses={courses} />
+        <Panel title="Up next" description="Lessons you haven't completed yet" action={{ href: "/learn", label: "Learn" }}>
+          <RecommendedLessons lessons={lessonLinks} />
         </Panel>
         <Panel title="Diagnostic challenges" description="Simulated faults, not real readings" action={{ href: "/diagnose", label: "Play" }}>
+          <div className="mb-2">
+            <Badge tone="caution">Sample data</Badge>
+          </div>
           <ChallengeList challenges={challenges} />
         </Panel>
         <Panel
@@ -71,6 +78,9 @@ export default function DashboardPage() {
           action={{ href: "/repairs", label: "Repository" }}
           className="md:col-span-2 xl:col-span-1"
         >
+          <div className="mb-2">
+            <Badge tone="caution">Sample data</Badge>
+          </div>
           <RepairCaseList cases={recentRepairCases} />
         </Panel>
       </div>

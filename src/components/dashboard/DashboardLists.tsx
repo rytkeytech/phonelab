@@ -1,48 +1,13 @@
 import Link from "next/link";
-import { Clock, Footprints } from "lucide-react";
-import type {
-  ChallengeSummary,
-  Course,
-  Difficulty,
-  LessonSummary,
-  RepairCaseSummary,
-} from "@/lib/types";
+import { Footprints } from "lucide-react";
+import type { ChallengeSummary, RepairCaseSummary } from "@/lib/types";
 import { platformNames } from "@/data/sample";
 import { Badge } from "@/components/ui/Badge";
 import { ConfidenceBadge } from "@/components/ui/ConfidenceBadge";
-
-const difficultyLabel: Record<Difficulty, string> = {
-  beginner: "Beginner",
-  intermediate: "Intermediate",
-  advanced: "Advanced",
-};
+import { difficultyLabel } from "@/components/learn/LessonRow";
 
 const rowClass =
   "block rounded-lg px-2 py-2.5 hover:bg-raised focus-visible:outline-2 focus-visible:outline-accent";
-
-export function LessonList({ lessons, courses }: { lessons: LessonSummary[]; courses: Course[] }) {
-  return (
-    <ul className="-mx-2 divide-y divide-line">
-      {lessons.map((lesson) => {
-        const course = courses.find((c) => c.id === lesson.courseId);
-        return (
-          <li key={lesson.id}>
-            <Link href="/learn" className={rowClass}>
-              <p className="text-sm text-ink">{lesson.title}</p>
-              <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-                <span>{course?.title}</span>
-                <span className="inline-flex items-center gap-1">
-                  <Clock aria-hidden className="size-3" />
-                  {lesson.minutes} min
-                </span>
-              </p>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
 
 export function ChallengeList({ challenges }: { challenges: ChallengeSummary[] }) {
   return (

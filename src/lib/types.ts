@@ -55,19 +55,51 @@ export type ChipsetConnection = {
 // ---- Learning ----
 
 export type Course = {
+  /** Also used as the URL segment: /learn/[course] */
   id: string;
   order: number;
   title: string;
   description: string;
-  lessonCount: number;
 };
 
-export type LessonSummary = {
+/** Diagrams that lesson content can embed by id. */
+export type LessonDiagramId = "power-path" | "boot-sequence" | "diode-mode";
+
+/** One piece of lesson content. Lessons are an ordered list of these. */
+export type LessonBlock =
+  | { type: "heading"; text: string }
+  | { type: "text"; text: string }
+  | { type: "list"; items: string[]; ordered?: boolean }
+  | { type: "callout"; tone: "key" | "tip" | "caution"; title: string; text: string }
+  | { type: "example"; title: string; steps: string[]; note?: string }
+  | { type: "diagram"; diagram: LessonDiagramId; caption: string }
+  | { type: "explorer"; blockId: string; text: string };
+
+export type QuizQuestion = {
+  id: string;
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  /** Shown after answering, whether right or wrong */
+  explanation: string;
+};
+
+export type Lesson = {
+  /** Unique across all courses: "<courseId>/<slug>" */
   id: string;
   courseId: string;
+  /** URL segment: /learn/[course]/[lesson] */
+  slug: string;
+  order: number;
   title: string;
+  summary: string;
   minutes: number;
   difficulty: Difficulty;
+  /** Planned lessons appear in the outline but have no content yet */
+  status: "published" | "planned";
+  objectives: string[];
+  blocks: LessonBlock[];
+  quiz: QuizQuestion[];
 };
 
 // ---- Repairs ----

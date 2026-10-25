@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ChipsetExplorer } from "@/components/explorer/ChipsetExplorer";
+import { ExplorerFromUrl } from "@/components/explorer/ExplorerFromUrl";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
 
@@ -21,7 +23,10 @@ export default function ExplorerPage() {
         UNISOC and Apple designs each vary. Always confirm with the schematic or
         boardview for the exact model.
       </Notice>
-      <ChipsetExplorer />
+      {/* The URL's ?block= is only known in the browser; the default view renders until then. */}
+      <Suspense fallback={<ChipsetExplorer />}>
+        <ExplorerFromUrl />
+      </Suspense>
     </>
   );
 }

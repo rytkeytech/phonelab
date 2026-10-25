@@ -24,8 +24,8 @@ export function SidebarFooter() {
         <FlaskConical aria-hidden className="size-3.5" />
         Preview build
       </p>
-      Showing sample data. Accounts and saved progress arrive with Supabase in
-      Stage 3.
+      Lesson progress is saved in this browser. Repairs and challenges show
+      sample data until Supabase accounts are connected.
     </div>
   );
 }
