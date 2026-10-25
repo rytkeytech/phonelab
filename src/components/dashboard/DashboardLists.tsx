@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Footprints } from "lucide-react";
-import type { ChallengeSummary, RepairCase } from "@/lib/types";
+import type { GameScenario, RepairCase } from "@/lib/types";
 import { platformNames } from "@/data/repairs";
 import { Badge } from "@/components/ui/Badge";
 import { ConfidenceBadge } from "@/components/ui/ConfidenceBadge";
@@ -9,12 +9,12 @@ import { difficultyLabel } from "@/components/learn/LessonRow";
 const rowClass =
   "block rounded-lg px-2 py-2.5 hover:bg-raised focus-visible:outline-2 focus-visible:outline-accent";
 
-export function ChallengeList({ challenges }: { challenges: ChallengeSummary[] }) {
+export function ChallengeList({ scenarios }: { scenarios: GameScenario[] }) {
   return (
     <ul className="-mx-2 divide-y divide-line">
-      {challenges.map((c) => (
+      {scenarios.map((c) => (
         <li key={c.id}>
-          <Link href="/diagnose" className={rowClass}>
+          <Link href={`/diagnose/${c.id}`} className={rowClass}>
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm text-ink">{c.title}</p>
               <Badge>{difficultyLabel[c.difficulty]}</Badge>
@@ -23,7 +23,7 @@ export function ChallengeList({ challenges }: { challenges: ChallengeSummary[] }
               <span>{c.symptom}</span>
               <span className="inline-flex items-center gap-1">
                 <Footprints aria-hidden className="size-3" />
-                {c.steps} steps
+                {c.steps.length} steps
               </span>
             </p>
           </Link>

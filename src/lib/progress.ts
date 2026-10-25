@@ -10,16 +10,19 @@ import { useSyncExternalStore } from "react";
  */
 
 export type QuizResult = { score: number; total: number };
+export type GameResult = { score: number; max: number };
 
 export type ProgressState = {
   /** lessonId -> ISO date completed */
   completed: Record<string, string>;
   /** lessonId -> best quiz result */
   quiz: Record<string, QuizResult>;
+  /** scenarioId -> best diagnostic game result */
+  games: Record<string, GameResult>;
 };
 
 const STORAGE_KEY = "phonelab.progress.v1";
-const EMPTY: ProgressState = { completed: {}, quiz: {} };
+const EMPTY: ProgressState = { completed: {}, quiz: {}, games: {} };
 
 let cache: ProgressState | null = null;
 const listeners = new Set<() => void>();
@@ -32,7 +35,8 @@ function load(): ProgressState {
   try {
     const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
     if (isRecord(parsed) && isRecord(parsed.completed) && isRecord(parsed.quiz)) {
-      return parsed as ProgressState;
+      // Saves from before the diagnostic game have no "games" entry.
+      return { ...(parsed as ProgressState), games: isRecord(parsed.games) ? (parsed.games as ProgressState["games"]) : {} };
     }
   } catch {
     // Storage blocked or corrupted: start fresh.
@@ -80,11 +84,11 @@ export function useProgress() {
 }
 
 export function setLessonComplete(lessonId: string, complete: boolean) {
-  const { completed, quiz } = getSnapshot();
-  const next = { ...completed };
+  const state = getSnapshot();
+  const next = { ...state.completed };
   if (complete) next[lessonId] = new Date().toISOString();
   else delete next[lessonId];
-  save({ completed: next, quiz });
+  save({ ...state, completed: next });
 }
 
 /** Keeps the best score for each lesson. */
@@ -93,6 +97,14 @@ export function recordQuizResult(lessonId: string, result: QuizResult) {
   const best = state.quiz[lessonId];
   if (best && best.score >= result.score) return;
   save({ ...state, quiz: { ...state.quiz, [lessonId]: result } });
+}
+
+/** Keeps the best score for each scenario. */
+export function recordGameResult(scenarioId: string, result: GameResult) {
+  const state = getSnapshot();
+  const best = state.games[scenarioId];
+  if (best && best.score >= result.score) return;
+  save({ ...state, games: { ...state.games, [scenarioId]: result } });
 }
 
 export function resetProgress() {

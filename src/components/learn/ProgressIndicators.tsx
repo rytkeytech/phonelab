@@ -35,15 +35,15 @@ export function LessonStatusIcon({ lessonId }: { lessonId: string }) {
 }
 
 export function ResetProgressButton() {
-  const { completed, quiz } = useProgress();
-  const hasProgress = Object.keys(completed).length > 0 || Object.keys(quiz).length > 0;
+  const { completed, quiz, games } = useProgress();
+  const hasProgress = [completed, quiz, games].some((record) => Object.keys(record).length > 0);
   if (!hasProgress) return null;
 
   return (
     <button
       type="button"
       onClick={() => {
-        if (window.confirm("Clear all lesson progress and quiz scores saved in this browser?")) resetProgress();
+        if (window.confirm("Clear all lesson progress, quiz scores and challenge scores saved in this browser?")) resetProgress();
       }}
       className="text-xs text-faint underline-offset-2 hover:text-ink hover:underline focus-visible:outline-2 focus-visible:outline-accent"
     >

@@ -1,11 +1,10 @@
-import { Bookmark, Stethoscope, Target } from "lucide-react";
-import { challenges, sampleStats } from "@/data/sample";
+import { scenarios } from "@/data/diagnose";
 import { getLatestRepairCases } from "@/data/repairs";
 import { courses, getCourse, getCourseLessons, lessonHref, publishedLessons } from "@/data/learning";
 import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Panel } from "@/components/ui/Panel";
-import { StatTile } from "@/components/dashboard/StatTile";
+import { AverageScoreTile, ChallengesSolvedTile, QuizzesPassedTile } from "@/components/dashboard/DashboardStats";
 import { ExplorerPreview } from "@/components/dashboard/ExplorerPreview";
 import { ChallengeList, RepairCaseList } from "@/components/dashboard/DashboardLists";
 import { ConfidenceLegend } from "@/components/dashboard/ConfidenceLegend";
@@ -46,9 +45,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <LessonsCompletedTile publishedIds={publishedLessons.map((l) => l.id)} />
-        <StatTile icon={Stethoscope} label="Challenges solved" value={String(sampleStats.challengesSolved)} detail="Sample data" />
-        <StatTile icon={Target} label="Average score" value={`${sampleStats.averageScore}%`} detail="Sample data" />
-        <StatTile icon={Bookmark} label="Saved cases" value={String(sampleStats.savedCases)} detail="Sample data" />
+        <ChallengesSolvedTile scenarioIds={scenarios.map((s) => s.id)} />
+        <AverageScoreTile />
+        <QuizzesPassedTile lessonIds={publishedLessons.map((l) => l.id)} />
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
@@ -68,10 +67,7 @@ export default function DashboardPage() {
           <RecommendedLessons lessons={lessonLinks} />
         </Panel>
         <Panel title="Diagnostic challenges" description="Simulated faults, not real readings" action={{ href: "/diagnose", label: "Play" }}>
-          <div className="mb-2">
-            <Badge tone="caution">Sample data</Badge>
-          </div>
-          <ChallengeList challenges={challenges} />
+          <ChallengeList scenarios={scenarios} />
         </Panel>
         <Panel
           title="Latest repair cases"

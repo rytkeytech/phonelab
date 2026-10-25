@@ -171,10 +171,50 @@ export type RepairCase = {
 
 // ---- Diagnostic game ----
 
-export type ChallengeSummary = {
+/** How good a choice is. Best and reasonable choices move the scenario on; the others don't. */
+export type ChoiceQuality = "best" | "ok" | "poor" | "unsafe";
+
+/** A simulated meter or tool reading. Always shown labelled as simulated. */
+export type SimulatedReading = {
+  label: string;
+  value: string;
+  /** Simulated known-good comparison, if any */
+  reference?: string;
+};
+
+export type GameChoice = {
+  id: string;
+  label: string;
+  quality: ChoiceQuality;
+  /** Why this choice is good or bad */
+  feedback: string;
+  /** What the technician learns from doing it (simulated) */
+  finding?: string;
+  reading?: SimulatedReading;
+};
+
+export type GameStep = {
+  id: string;
+  /** The situation and question at this step */
+  prompt: string;
+  choices: GameChoice[];
+};
+
+export type GameScenario = {
+  /** Also the URL segment: /diagnose/[scenarioId] */
   id: string;
   title: string;
   symptom: string;
   difficulty: Difficulty;
-  steps: number;
+  /** The customer's report, as they'd say it */
+  brief: string;
+  /** Describes the simulated device without claiming to be a real model */
+  device: string;
+  steps: GameStep[];
+  debrief: {
+    rootCause: string;
+    lessons: string[];
+  };
+  relatedLessonIds: string[];
+  relatedBlocks: string[];
 };
