@@ -11,11 +11,15 @@ import type { ChipsetBlock, ChipsetConnection, SignalType } from "@/lib/types";
  */
 
 export const signalTypes: Record<SignalType, { label: string; description: string }> = {
-  power: { label: "Power", description: "Supply rails from the PMIC or charger" },
-  data: { label: "Data", description: "High-speed data interfaces" },
-  control: { label: "Control", description: "Low-speed configuration buses" },
-  clock: { label: "Clock & reset", description: "Timing references and reset signals" },
+  power: { label: "Power", description: "Conceptual supply paths from the PMIC or charging circuit" },
+  data: { label: "Data", description: "Conceptual high-speed data interfaces" },
+  control: { label: "Control", description: "Conceptual low-speed configuration buses" },
+  clock: { label: "Clock & reset", description: "Conceptual timing and reset relationships" },
 };
+
+/** Shown wherever connections are listed, so they are never read as a real board's wiring. */
+export const connectionsDisclaimer =
+  "Connections are conceptual. Actual power rails, signal paths and IC arrangements differ between phone models and board revisions.";
 
 export const chipsetBlocks: ChipsetBlock[] = [
   {
@@ -24,12 +28,13 @@ export const chipsetBlocks: ChipsetBlock[] = [
     label: "SoC",
     category: "core",
     summary:
-      "The main processor package. It runs the operating system and controls almost every other block on the board.",
+      "The main processor package. It handles processing and coordinates many subsystems, but it does not directly control every component. Some circuits, such as charging, protection and parts of power sequencing, can work on their own or under the PMIC's control.",
     functions: [
       "CPU and GPU cores that run Android or iOS and apps",
       "Memory controller that talks to RAM",
       "Storage controller that loads the bootloader and OS",
       "Display, camera and audio interfaces",
+      "Coordinates other ICs over control buses; many peripherals also have their own controllers and firmware",
       "On many platforms, the cellular modem (baseband) is integrated in the same package",
       "A boot ROM that runs first at power-on and can expose an emergency download mode over USB",
     ],
@@ -41,7 +46,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "A short circuit on one of the SoC's supply rails",
     ],
     diagnosis: [
-      "Treat the SoC as the last suspect. First confirm the PMIC rails, clocks and reset are present.",
+      "Treat the SoC as the last suspect. Missing power, clock or reset, or a shorted component nearby, can look exactly like an SoC failure.",
       "Watch the current draw on a DC power supply while pressing power, and compare the pattern with a known-good board of the same model.",
       "Check whether the boot ROM enumerates on USB (for example Qualcomm EDL or MediaTek BROM modes). This helps separate SoC faults from storage or firmware faults.",
       "For a shorted rail, find the shorted component with thermal imaging or rosin before suspecting the SoC itself.",
@@ -56,13 +61,13 @@ export const chipsetBlocks: ChipsetBlock[] = [
     label: "PMIC",
     category: "power",
     summary:
-      "Turns battery power into the many regulated supply rails the phone needs and switches them on in the correct order.",
+      "Turns battery power into the many regulated supply rails the phone needs. On most designs it also takes part in power sequencing and reset control, but exactly how varies by platform.",
     functions: [
       "Generates multiple supply rails using buck converters and LDO regulators",
-      "Runs the power-on sequence when the power key is pressed",
-      "Holds the SoC in reset until rails are stable, then releases it",
+      "Takes part in the power-on sequence when the power key is pressed. The order of rails, and which chip controls each step, varies by platform.",
+      "Often takes part in reset control, for example holding the SoC in reset until rails are stable. How reset is generated varies by platform.",
       "Often contains the real-time clock (RTC) and power-key detection",
-      "Some platforms use a main PMIC plus one or more secondary PMICs",
+      "Some platforms use a main PMIC plus one or more secondary PMICs or separate regulators",
     ],
     dependsOn: ["charging", "clock"],
     symptoms: [
@@ -72,11 +77,14 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Random shutdowns or restarts",
     ],
     diagnosis: [
-      "Confirm battery supply reaches the PMIC (follow the battery line from the connector using the schematic).",
+      "Rule out the simple causes first: battery, charging port, power key and its flex.",
+      "Confirm battery supply reaches the PMIC (follow the battery line from the connector using the schematic), and check that line for a short.",
       "Check the power-key line and confirm it changes state when pressed.",
       "Measure each output rail and compare against the schematic or a known-good board of the same model. Never assume a value from another phone.",
-      "In diode mode, compare readings on the rail capacitors with a known-good board to find shorts.",
+      "In diode mode, compare readings on the rail capacitors with a known-good board to find shorts. A shorted capacitor or load on a rail is more common than a failed PMIC.",
     ],
+    caution:
+      "A dead phone does not automatically mean the PMIC is faulty. A flat or failed battery, a faulty power key, a shorted rail, or a fault elsewhere can produce the same symptom.",
     box: { x: 40, y: 260, w: 180, h: 110 },
   },
   {
@@ -85,13 +93,15 @@ export const chipsetBlocks: ChipsetBlock[] = [
     label: "Battery / Charging",
     category: "power",
     summary:
-      "Brings power in from the USB port, charges the battery, and protects the board against over-voltage.",
+      "The battery, the charging IC, the USB input path and the protection circuits around them. Actual designs vary: some phones use separate chips for each job, others combine them, and many add fast-charge or wireless-charging ICs.",
     functions: [
-      "Charger IC that controls charging current and voltage",
-      "Over-voltage protection (OVP) between the USB port and the charger, on many designs",
-      "Battery connector, including a temperature or ID line on many batteries",
+      "Battery: the cell plus its own protection circuit inside the pack",
+      "USB input path: the charging port, its flex or sub-board, and filtering on the way to the charger",
+      "Charging IC: controls charging current and voltage",
+      "Protection circuits: over-voltage protection (OVP) on many designs, plus other current or temperature protection that varies by design",
+      "Battery connector, often with a temperature or ID line",
       "Fast-charge negotiation with the charger (protocol varies by brand)",
-      "Configured by the SoC when the phone is on; many charger ICs can also charge with the phone switched off",
+      "Configured by the SoC when the phone is on; many charging ICs can also charge with the phone switched off",
     ],
     dependsOn: [],
     symptoms: [
@@ -102,8 +112,9 @@ export const chipsetBlocks: ChipsetBlock[] = [
     ],
     diagnosis: [
       "Start with the cheapest checks: cable, charger, port debris, and a known-good battery.",
+      "Try a known-good charging port flex or sub-board if the phone has one.",
       "Use a USB ammeter to watch charging current behaviour.",
-      "Check the OVP and charger IC areas for liquid damage or shorts.",
+      "Check the protection (OVP) and charging IC areas for liquid damage or shorts.",
       "Check the battery connector lines against the schematic, including the temperature/ID line.",
     ],
     box: { x: 40, y: 150, w: 180, h: 64 },
@@ -114,12 +125,13 @@ export const chipsetBlocks: ChipsetBlock[] = [
     label: "Clocks & Reset",
     category: "timing",
     summary:
-      "Crystals and oscillators give the board its timing. Reset signals hold chips still until power is stable. They are grouped here as one concept, but they are separate parts on a real board.",
+      "Clocks provide timing. Reset signals hold chips in a known startup state until conditions are right. These are separate signals, grouped together here only as a learning concept. On a real board they may involve several ICs: crystals, oscillators, the PMIC and the SoC itself.",
     functions: [
-      "Sleep / RTC crystal, typically 32.768 kHz, often connected to the PMIC",
-      "Main reference clock for the SoC and RF. The frequency depends on the platform, so check the schematic.",
-      "Power-on reset: released by the PMIC when rails are ready",
-      "Watchdog resets that restart the system if software hangs",
+      "Clock: sleep / RTC crystal, typically 32.768 kHz, often connected to the PMIC",
+      "Clock: main reference clock for the SoC. The frequency depends on the platform, so check the schematic.",
+      "Clock: RF, Wi-Fi and other ICs may use the main reference or their own clock sources",
+      "Reset: power-on reset holds chips in a startup state until supplies are ready, then releases them",
+      "Reset: watchdog resets restart the system if software hangs; many peripherals also have their own reset lines",
     ],
     dependsOn: ["pmic"],
     symptoms: [
@@ -128,7 +140,8 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Clock or date resets after power loss",
     ],
     diagnosis: [
-      "Inspect crystals for cracks, corrosion or liquid damage.",
+      "A missing clock and a stuck reset can look the same, because in both cases the board doesn't start. Check each one separately.",
+      "Inspect crystals and oscillators for cracks, corrosion or liquid damage.",
       "A multimeter cannot confirm a clock is oscillating correctly. Use an oscilloscope where possible.",
       "Check the reset line's state against the schematic during power-on.",
     ],
@@ -154,11 +167,14 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Flashing tool reports a DRAM/memory initialisation error",
     ],
     diagnosis: [
+      "Make sure the flashing tool, loader and firmware match the exact model before trusting a memory error.",
       "Confirm the RAM supply rails are present (values from the model's schematic).",
       "Ask about drop and liquid history.",
-      "Read flashing-tool logs; some tools report memory initialisation failures.",
-      "Rework of PoP memory is an advanced, high-risk repair.",
+      "Read flashing-tool logs carefully and compare with known-good behaviour for that model.",
+      "Rework of PoP memory is an advanced, high-risk repair. Only consider it once the other causes are ruled out.",
     ],
+    caution:
+      "A memory initialisation error does not prove the RAM is faulty. It can also come from a wrong loader or firmware, a missing or unstable supply, a solder or connection problem between the SoC and RAM, or an SoC fault.",
     box: { x: 330, y: 520, w: 150, h: 64 },
   },
   {
@@ -167,7 +183,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
     label: "Storage",
     category: "memory",
     summary:
-      "Permanent storage for the bootloader, operating system and user data.",
+      "Permanent storage for the bootloader, operating system and user data. Flashing failures and boot loops can come from firmware, power, communication or storage faults, so storage is not automatically to blame.",
     functions: [
       "eMMC on many budget phones, UFS on most mid- and high-end phones",
       "Stores boot partitions, OS, and user data",
@@ -175,14 +191,15 @@ export const chipsetBlocks: ChipsetBlock[] = [
     ],
     dependsOn: ["pmic", "soc"],
     symptoms: [
-      "Stuck on logo or boots straight into fastboot / download mode",
+      "Stuck on logo, boot loop, or boots straight into fastboot / download mode",
       "Flashing tool cannot detect or read the storage",
       "Data loss, corrupted apps, or read/write errors",
     ],
     diagnosis: [
-      "Separate software from hardware first. Try a correct firmware flash before replacing parts.",
-      "Check the storage supply rails against the schematic.",
-      "In boot ROM mode, check whether the flashing tool can identify the storage chip.",
+      "Firmware: rule out software first. Try a correct firmware for the exact model before replacing parts.",
+      "Power: check the storage supply rails against the schematic.",
+      "Communication: in boot ROM mode, check whether the flashing tool can identify the storage chip. If not, consider solder or interface problems as well as the chip itself.",
+      "Storage: suspect the chip only after firmware, power and communication are ruled out.",
     ],
     caution:
       "On many modern devices storage is cryptographically paired with the SoC. Replacement may need device-specific programming or may not be possible, and user data is usually unrecoverable.",
@@ -207,9 +224,11 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Lines, flicker, or colour faults",
     ],
     diagnosis: [
-      "Always test with a known-good screen first.",
-      "Inspect the connector and nearby filters for corrosion or damage.",
-      "Check the display / backlight supply circuits against the schematic.",
+      "Confirm the phone is actually on: it vibrates, rings, or a computer detects it.",
+      "Test with a known-good screen of the correct part.",
+      "Reseat the connector and inspect it, the flex and nearby filters for damage, corrosion or liquid.",
+      "Only then check the display / backlight supply circuits against the schematic.",
+      "Suspect a board-side display IC last, after the screen, connector and supplies are ruled out.",
     ],
     box: { x: 300, y: 40, w: 160, h: 64 },
   },
@@ -231,9 +250,11 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Touch fails only while charging",
     ],
     diagnosis: [
-      "Test with a known-good screen assembly first.",
-      "Touch that fails only on a charger often points to a noisy charger or cable.",
-      "Check connector pins and interface lines for continuity using the schematic.",
+      "Start simple: restart, remove the screen protector and case, and try safe mode to rule out apps.",
+      "Touch that fails only on a charger often points to a noisy charger or cable. Try a known-good one.",
+      "Test with a known-good screen assembly. On many phones the touch controller is part of the screen.",
+      "Inspect and reseat the connector, then check interface lines for continuity using the schematic.",
+      "Suspect a board-side touch IC last.",
     ],
     box: { x: 500, y: 40, w: 160, h: 64 },
   },
@@ -256,9 +277,11 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Flashlight not working",
     ],
     diagnosis: [
+      "Start simple: restart, clear the camera app's cache, try safe mode or another camera app.",
+      "Check for a dirty or cracked lens and signs of impact or liquid.",
       "Swap in a known-good module of the same part number.",
-      "Inspect the connector and nearby filters for damage.",
-      "Check module supplies against the schematic.",
+      "Inspect and reseat the connector, then check module supplies against the schematic.",
+      "Suspect board-side ICs last.",
     ],
     caution:
       "On some devices camera modules are paired to the board, so a swapped module may show warnings or lose features.",
@@ -284,9 +307,11 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "SIM not detected",
     ],
     diagnosis: [
-      "Rule out software, network settings and the SIM card itself first.",
-      "Inspect antenna cables, contacts and the SIM reader.",
-      "A Wi-Fi option that won't turn on often relates to the Wi-Fi IC, its supplies, or its clock. Confirm using the schematic.",
+      "Start simple: airplane mode on and off, reset network settings, update the software, and test the SIM in another phone.",
+      "Check that the IMEI and baseband version show in settings. If they are missing, investigate software or baseband issues before hardware.",
+      "Inspect antenna cables, antenna contacts and the SIM reader.",
+      "Only then check the RF or Wi-Fi IC's supplies and clock against the schematic.",
+      "Suspect the RF or Wi-Fi IC itself last.",
     ],
     caution:
       "Never alter a device's IMEI. It is illegal in many countries.",
@@ -311,9 +336,11 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Distorted or crackling sound",
     ],
     diagnosis: [
+      "Start simple: check volume, silent / Do Not Disturb, disconnect Bluetooth, and try safe mode.",
+      "Clean the speaker mesh and microphone holes. Record a voice memo to test each microphone.",
       "Test with Bluetooth or headphones to see if the problem is in one audio path only.",
-      "Check speaker / earpiece continuity with a multimeter.",
-      "Check the amplifier area and its supply against the schematic.",
+      "Try a known-good speaker or flex, and check speaker / earpiece continuity with a multimeter.",
+      "Only then check the amplifier or codec area and its supply against the schematic.",
     ],
     box: { x: 760, y: 330, w: 180, h: 64 },
   },
@@ -333,12 +360,12 @@ const pmicBottomBus: [number, number][] = [
 
 export const chipsetConnections: ChipsetConnection[] = [
   // Power
-  { id: "p-charging-pmic", from: "charging", to: "pmic", type: "power", label: "Battery supply into the PMIC", points: [[130, 214], [130, 260]] },
-  { id: "p-pmic-soc", from: "pmic", to: "soc", type: "power", label: "Several SoC core and I/O rails", points: [[220, 340], [380, 340]] },
-  { id: "p-pmic-display", from: "pmic", to: "display", type: "power", label: "Display supplies", points: [...pmicTopBus, [340, 130], [340, 104]] },
+  { id: "p-charging-pmic", from: "charging", to: "pmic", type: "power", label: "Battery / charging path to the PMIC (arrangement varies)", points: [[130, 214], [130, 260]] },
+  { id: "p-pmic-soc", from: "pmic", to: "soc", type: "power", label: "SoC supply rails (typically several)", points: [[220, 340], [380, 340]] },
+  { id: "p-pmic-display", from: "pmic", to: "display", type: "power", label: "Display supplies (may come from dedicated ICs)", points: [...pmicTopBus, [340, 130], [340, 104]] },
   { id: "p-pmic-touch", from: "pmic", to: "touch", type: "power", label: "Touch controller supply", points: [...pmicTopBus, [620, 130], [620, 104]] },
-  { id: "p-pmic-cameras", from: "pmic", to: "cameras", type: "power", label: "Camera module supplies", points: [...pmicTopBus, [900, 130], [900, 104]] },
-  { id: "p-pmic-connectivity", from: "pmic", to: "connectivity", type: "power", label: "RF and Wi-Fi supplies", points: [...pmicTopBus, [720, 130], [720, 250], [760, 250]] },
+  { id: "p-pmic-cameras", from: "pmic", to: "cameras", type: "power", label: "Camera module supplies (may include dedicated regulators)", points: [...pmicTopBus, [900, 130], [900, 104]] },
+  { id: "p-pmic-connectivity", from: "pmic", to: "connectivity", type: "power", label: "RF and Wi-Fi supplies (some taken directly from battery power)", points: [...pmicTopBus, [720, 130], [720, 250], [760, 250]] },
   { id: "p-pmic-audio", from: "pmic", to: "audio", type: "power", label: "Audio codec / amplifier supplies", points: [...pmicTopBus, [720, 130], [720, 380], [760, 380]] },
   { id: "p-pmic-ram", from: "pmic", to: "ram", type: "power", label: "Memory supply rails", points: [...pmicBottomBus, [360, 480], [360, 520]] },
   { id: "p-pmic-storage", from: "pmic", to: "storage", type: "power", label: "Storage supply rails", points: [...pmicBottomBus, [640, 480], [640, 520]] },
@@ -354,9 +381,9 @@ export const chipsetConnections: ChipsetConnection[] = [
 
   // Control
   { id: "c-soc-pmic", from: "soc", to: "pmic", type: "control", label: "PMIC control bus (platform-dependent, e.g., SPMI or I²C)", points: [[380, 300], [220, 300]] },
-  { id: "c-soc-charging", from: "soc", to: "charging", type: "control", label: "Charger control (commonly I²C)", points: [[380, 230], [300, 230], [300, 182], [220, 182]] },
+  { id: "c-soc-charging", from: "soc", to: "charging", type: "control", label: "Charging IC control (commonly I²C)", points: [[380, 230], [300, 230], [300, 182], [220, 182]] },
 
   // Clock & reset
-  { id: "k-clock-pmic", from: "clock", to: "pmic", type: "clock", label: "Sleep / RTC clock and power-on reset", points: [[130, 430], [130, 370]] },
-  { id: "k-clock-soc", from: "clock", to: "soc", type: "clock", label: "Reference clock and reset release", points: [[220, 462], [300, 462], [300, 400], [380, 400]] },
+  { id: "k-clock-pmic", from: "clock", to: "pmic", type: "clock", label: "Sleep / RTC clock and reset relationship (varies by platform)", points: [[130, 430], [130, 370]] },
+  { id: "k-clock-soc", from: "clock", to: "soc", type: "clock", label: "Reference clock and reset release (separate signals)", points: [[220, 462], [300, 462], [300, 400], [380, 400]] },
 ];

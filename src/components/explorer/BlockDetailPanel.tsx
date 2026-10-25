@@ -1,6 +1,6 @@
 import { ArrowRight, MousePointerClick, TriangleAlert } from "lucide-react";
 import type { ChipsetBlock, ChipsetConnection } from "@/lib/types";
-import { signalTypes } from "@/data/chipset-conceptual";
+import { connectionsDisclaimer, signalTypes } from "@/data/chipset-conceptual";
 import { Badge } from "@/components/ui/Badge";
 import { categoryStyles, signalStyles } from "./styles";
 
@@ -54,7 +54,8 @@ export function BlockDetailPanel({ block, blocksById, connections, onSelect }: P
       )}
 
       {linked.length > 0 && (
-        <Section title="Connections in this diagram">
+        <Section title="Conceptual connections">
+          <p className="mb-2 text-xs leading-relaxed text-faint">{connectionsDisclaimer}</p>
           <ul className="space-y-1.5">
             {linked.map((c) => {
               const otherId = c.from === block.id ? c.to : c.from;

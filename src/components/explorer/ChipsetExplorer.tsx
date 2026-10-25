@@ -4,7 +4,12 @@ import { useMemo, useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import type { SignalType } from "@/lib/types";
 import { cx } from "@/lib/utils";
-import { chipsetBlocks, chipsetConnections, signalTypes } from "@/data/chipset-conceptual";
+import {
+  chipsetBlocks,
+  chipsetConnections,
+  connectionsDisclaimer,
+  signalTypes,
+} from "@/data/chipset-conceptual";
 import { BlockDetailPanel } from "./BlockDetailPanel";
 import { ChipsetDiagram } from "./ChipsetDiagram";
 import { signalStyles } from "./styles";
@@ -142,7 +147,10 @@ export function ChipsetExplorer({ initialBlockId = "soc" }: { initialBlockId?: s
             onSelect={select}
           />
         </div>
-        <p className="-mt-2 text-xs text-faint sm:hidden">Swipe the diagram sideways to see all blocks.</p>
+        <p className="-mt-2 text-xs leading-relaxed text-faint">
+          {connectionsDisclaimer}
+          <span className="sm:hidden"> Swipe the diagram sideways to see all blocks.</span>
+        </p>
 
         {/* Block list: an easy alternative to tapping small SVG shapes */}
         <div className="flex flex-wrap gap-2" aria-label="All blocks">
