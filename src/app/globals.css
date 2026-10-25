@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * PhoneLab design tokens.
+ * Each --color-* entry becomes a Tailwind utility, e.g. --color-surface -> bg-surface.
+ */
+@theme {
+  /* Surfaces, darkest to lightest */
+  --color-canvas: #080c13;
+  --color-surface: #0e141e;
+  --color-raised: #151d2a;
+  --color-line: #222d3d;
+  --color-line-strong: #31405a;
+
+  /* Text */
+  --color-ink: #e6edf6;
+  --color-muted: #8c9bb1;
+  --color-faint: #5d6b80;
+
+  /* Brand accent */
+  --color-accent: #22d3ee;
+  --color-accent-strong: #06b6d4;
+  --color-accent-soft: #0e3440;
+
+  /* Signal types used by the chipset diagram */
+  --color-power: #f5a524;
+  --color-data: #22d3ee;
+  --color-control: #a78bfa;
+  --color-clock: #4ade80;
+
+  /* Confidence labels */
+  --color-verified: #34d399;
+  --color-corroborated: #60a5fa;
+  --color-hypothesis: #fbbf24;
+  --color-unverified: #94a3b8;
+
+  /* Warning surfaces (sample data, conceptual diagrams) */
+  --color-caution: #fbbf24;
+  --color-caution-soft: #2a2110;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/* Moving dashes on highlighted diagram connections */
+@keyframes signal-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.signal-flow {
+  stroke-dasharray: 8 4;
+  animation: signal-flow 0.9s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-flow {
+    animation: none;
+  }
 }
