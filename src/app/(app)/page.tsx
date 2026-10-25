@@ -1,5 +1,6 @@
 import { Bookmark, Stethoscope, Target } from "lucide-react";
-import { challenges, recentRepairCases, sampleStats } from "@/data/sample";
+import { challenges, sampleStats } from "@/data/sample";
+import { getLatestRepairCases } from "@/data/repairs";
 import { courses, getCourse, getCourseLessons, lessonHref, publishedLessons } from "@/data/learning";
 import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -73,7 +74,7 @@ export default function DashboardPage() {
           <ChallengeList challenges={challenges} />
         </Panel>
         <Panel
-          title="Recently viewed repair cases"
+          title="Latest repair cases"
           description="Fictional demo devices"
           action={{ href: "/repairs", label: "Repository" }}
           className="md:col-span-2 xl:col-span-1"
@@ -81,7 +82,7 @@ export default function DashboardPage() {
           <div className="mb-2">
             <Badge tone="caution">Sample data</Badge>
           </div>
-          <RepairCaseList cases={recentRepairCases} />
+          <RepairCaseList cases={getLatestRepairCases(3)} />
         </Panel>
       </div>
 

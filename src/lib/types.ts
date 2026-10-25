@@ -104,14 +104,69 @@ export type Lesson = {
 
 // ---- Repairs ----
 
-export type RepairCaseSummary = {
+export type FaultCategory = {
+  id: string;
+  label: string;
+};
+
+export type MeasurementMode = "dc-voltage" | "diode" | "resistance" | "continuity" | "current" | "other";
+
+/** One recorded measurement. Conditions are required so readings can be compared fairly. */
+export type RepairMeasurement = {
+  /** Where it was taken, described from the schematic or boardview */
+  point: string;
+  mode: MeasurementMode;
+  /** Board state, e.g. "Battery disconnected" or "DC supply, pressing power" */
+  condition: string;
+  observed: string;
+  /** What a known-good board showed, or why there is no reference */
+  reference: string;
+};
+
+export type RepairMedia = {
+  id: string;
+  url: string;
+  caption: string;
+  kind: "photo" | "thermal" | "diagram" | "other";
+};
+
+export type RepairSource = {
+  title: string;
+  url?: string;
+  kind: "documentation" | "practical" | "forum" | "video" | "other";
+  note?: string;
+};
+
+export type RepairCase = {
+  /** Also the URL segment: /repairs/[caseId] */
   id: string;
   title: string;
+  summary: string;
   brand: string;
   model: string;
+  /** null when the board revision wasn't recorded */
+  boardRevision: string | null;
   platform: ChipsetPlatform;
+  chipset: string | null;
   faultCategory: string;
+  symptoms: string[];
+  initialChecks: string[];
+  measurements: RepairMeasurement[];
+  diagnosticSteps: string[];
+  /** null when the root cause hasn't been determined */
+  rootCause: string | null;
+  repairProcedure: string[];
+  verification: string[];
+  media: RepairMedia[];
+  sources: RepairSource[];
   confidence: ConfidenceLevel;
+  /** Why this confidence level was given */
+  confidenceNote: string;
+  /** Chipset Explorer block ids this case relates to */
+  relatedBlocks: string[];
+  /** Fictional teaching case, not a real repair */
+  isSample: boolean;
+  updatedAt: string;
 };
 
 // ---- Diagnostic game ----

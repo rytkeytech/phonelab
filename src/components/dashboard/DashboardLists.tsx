@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Footprints } from "lucide-react";
-import type { ChallengeSummary, RepairCaseSummary } from "@/lib/types";
-import { platformNames } from "@/data/sample";
+import type { ChallengeSummary, RepairCase } from "@/lib/types";
+import { platformNames } from "@/data/repairs";
 import { Badge } from "@/components/ui/Badge";
 import { ConfidenceBadge } from "@/components/ui/ConfidenceBadge";
 import { difficultyLabel } from "@/components/learn/LessonRow";
@@ -33,12 +33,12 @@ export function ChallengeList({ challenges }: { challenges: ChallengeSummary[] }
   );
 }
 
-export function RepairCaseList({ cases }: { cases: RepairCaseSummary[] }) {
+export function RepairCaseList({ cases }: { cases: RepairCase[] }) {
   return (
     <ul className="-mx-2 divide-y divide-line">
       {cases.map((c) => (
         <li key={c.id}>
-          <Link href="/repairs" className={rowClass}>
+          <Link href={`/repairs/${c.id}`} className={rowClass}>
             <p className="text-sm text-ink">{c.title}</p>
             <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted">
               <ConfidenceBadge level={c.confidence} />
