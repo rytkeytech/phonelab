@@ -8,7 +8,8 @@ import { updateSession } from "@/lib/supabase/session";
  * 1. Returns a real 404 for content URLs that don't exist. Pages stream, so
  *    once rendering starts the status is already 200; checking here first
  *    lets missing lessons and scenarios answer with a proper 404.
- * 2. Refreshes the Supabase session cookie.
+ * 2. Forwards stray sign-in email links to /auth/callback.
+ * 3. Refreshes the Supabase session cookie.
  */
 
 const knownPaths = new Set([
@@ -26,7 +27,18 @@ function isUnknownContentPath(pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
-  if (isUnknownContentPath(request.nextUrl.pathname)) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  // If /auth/callback isn't in Supabase's allowed redirect URLs, email links
+  // land on the Site URL with ?code=…; finish the sign-in at the callback.
+  if (searchParams.has("code") && pathname !== "/auth/callback") {
+    const callback = new URL("/auth/callback", request.url);
+    callback.searchParams.set("code", searchParams.get("code")!);
+    callback.searchParams.set("next", pathname);
+    return NextResponse.redirect(callback);
+  }
+
+  if (isUnknownContentPath(pathname)) {
     // Rewriting to a path with no route renders the not-found page with a 404 status.
     return NextResponse.rewrite(new URL("/_page-not-found", request.url));
   }

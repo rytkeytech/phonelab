@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:seed-sql": "tsx scripts/generate-seed.ts",
     "db:apply": "tsx --env-file=.env.local scripts/db-apply.ts",
-    "db:check": "tsx --env-file=.env.local scripts/db-check.ts"
+    "db:check": "tsx --env-file=.env.local scripts/db-check.ts",
+    "db:set-role": "tsx --env-file=.env.local scripts/db-set-role.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

@@ -7,7 +7,7 @@ import { NavLinks } from "./NavLinks";
 import { SidebarFooter } from "./Sidebar";
 
 /** Top bar with a slide-out menu, shown below the lg breakpoint. */
-export function MobileNav() {
+export function MobileNav({ account }: { account: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   // Close on Escape and stop the page behind the drawer from scrolling.
@@ -69,7 +69,7 @@ export function MobileNav() {
             <nav aria-label="Main" className="flex-1 overflow-y-auto px-3 py-2">
               <NavLinks onNavigate={() => setOpen(false)} />
             </nav>
-            <SidebarFooter />
+            <SidebarFooter account={account} />
           </div>
         </div>
       )}

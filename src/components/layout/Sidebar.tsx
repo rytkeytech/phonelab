@@ -3,7 +3,7 @@ import { Logo } from "./Logo";
 import { NavLinks } from "./NavLinks";
 
 /** Desktop sidebar. Hidden below the lg breakpoint, where MobileNav takes over. */
-export function Sidebar() {
+export function Sidebar({ account }: { account: React.ReactNode }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-surface lg:flex">
       <div className="px-5 py-5">
@@ -12,20 +12,20 @@ export function Sidebar() {
       <nav aria-label="Main" className="flex-1 overflow-y-auto px-3">
         <NavLinks />
       </nav>
-      <SidebarFooter />
+      <SidebarFooter account={account} />
     </aside>
   );
 }
 
-export function SidebarFooter() {
+/** Account box plus a note about sample content; shared with the mobile menu. */
+export function SidebarFooter({ account }: { account: React.ReactNode }) {
   return (
-    <div className="m-3 rounded-lg border border-line bg-raised p-3 text-xs leading-relaxed text-muted">
-      <p className="mb-1 flex items-center gap-1.5 font-semibold text-caution">
-        <FlaskConical aria-hidden className="size-3.5" />
-        Preview build
+    <div className="m-3 flex flex-col gap-2">
+      {account}
+      <p className="flex items-start gap-1.5 px-1 text-[11px] leading-relaxed text-faint">
+        <FlaskConical aria-hidden className="mt-0.5 size-3 shrink-0 text-caution" />
+        Repair cases are samples until reviewed submissions are published.
       </p>
-      Progress and scores are saved in this browser. Repair cases are
-      samples until Supabase accounts are connected.
     </div>
   );
 }
