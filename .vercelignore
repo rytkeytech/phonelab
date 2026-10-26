@@ -1,0 +1,7 @@
+# Never upload local secrets or tooling when deploying from this computer.
+# (Deploys from GitHub never include these anyway: they're git-ignored.)
+.env*
+!.env.example
+.next
+node_modules
+.vercel
