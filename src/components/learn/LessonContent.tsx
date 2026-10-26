@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowRight, Cpu, KeyRound, Lightbulb, TriangleAlert } from "lucide-react";
 import type { LessonBlock } from "@/lib/types";
 import { cx } from "@/lib/utils";
-import { lessonDiagrams } from "./diagrams";
+import { SourceCitation } from "@/components/research/SourceCitation";
+import { diagramKindLabel, lessonDiagrams } from "./diagrams";
 
 const calloutStyles = {
   key: { icon: KeyRound, className: "border-accent/30 bg-accent-soft/50", iconClass: "text-accent" },
@@ -14,9 +15,17 @@ const calloutStyles = {
 export function LessonContent({ blocks }: { blocks: LessonBlock[] }) {
   return (
     <div className="flex flex-col gap-5 text-[15px] leading-relaxed text-ink/90">
-      {blocks.map((block, i) => (
-        <Block key={i} block={block} />
-      ))}
+      {blocks.map((block, i) =>
+        block.claims?.length ? (
+          // The citation sits right under the content it supports.
+          <div key={i} className="flex flex-col gap-2">
+            <Block block={block} />
+            <SourceCitation claimIds={block.claims} />
+          </div>
+        ) : (
+          <Block key={i} block={block} />
+        ),
+      )}
     </div>
   );
 }
@@ -83,9 +92,12 @@ function Block({ block }: { block: LessonBlock }) {
       );
 
     case "diagram": {
-      const Diagram = lessonDiagrams[block.diagram];
+      const { Diagram, kind } = lessonDiagrams[block.diagram];
       return (
         <figure className="rounded-xl border border-line bg-surface p-4 sm:p-6">
+          <p className="mb-3 font-mono text-[11px] tracking-wider text-faint uppercase">
+            {diagramKindLabel[kind]} · not a schematic of any specific phone
+          </p>
           <Diagram />
           <figcaption className="mt-4 flex gap-2 text-xs leading-relaxed text-muted">
             <TriangleAlert aria-hidden className="mt-0.5 size-3.5 shrink-0 text-caution" />

@@ -1,4 +1,5 @@
 import type { GameScenario } from "@/lib/types";
+import { deadAfterCharge } from "./case-dead-after-charge";
 
 /*
  * SIMULATED diagnostic scenarios.
@@ -9,173 +10,7 @@ import type { GameScenario } from "@/lib/types";
  */
 
 export const scenarios: GameScenario[] = [
-  {
-    id: "dead-after-charge",
-    title: "The phone that died on the charger",
-    symptom: "No power, no response",
-    difficulty: "beginner",
-    brief: "“I left it charging overnight with a cheap fast charger I bought at the market. In the morning it was completely dead. Nothing happens when I press power or plug it in.”",
-    device: "Simulated Android phone. Not a real model.",
-    steps: [
-      {
-        id: "start",
-        prompt: "The phone is on your bench. Where do you start?",
-        choices: [
-          {
-            id: "flash",
-            label: "Flash new firmware",
-            quality: "poor",
-            feedback: "The phone shows no sign of life, so a computer won't detect it for flashing. Firmware comes later, once you know the board powers up.",
-          },
-          {
-            id: "history",
-            label: "Get the full history and inspect the phone: charger used, liquid, drops, port and battery condition",
-            quality: "best",
-            feedback: "History and a visual check cost nothing and often point straight at the fault area.",
-            finding: "Customer confirms an unbranded fast charger. No liquid or drops reported. The port looks clean and the battery isn't swollen.",
-          },
-          {
-            id: "known-good",
-            label: "Try a known-good battery and charger",
-            quality: "ok",
-            feedback: "A sensible cheap check, but you skipped the history and inspection that could have guided you.",
-            finding: "No change with a known-good battery and charger.",
-          },
-          {
-            id: "high-current",
-            label: "Apply a high current to the battery connector to 'wake it up'",
-            quality: "unsafe",
-            feedback: "If something is shorted, high current can burn the board and destroy evidence. Always start with a low current limit.",
-          },
-        ],
-      },
-      {
-        id: "bench",
-        prompt: "Basic checks didn't revive it. What's your next test?",
-        choices: [
-          {
-            id: "press-repeatedly",
-            label: "Hold the power key for longer with the charger connected",
-            quality: "poor",
-            feedback: "You've already confirmed it doesn't respond. Repeating the same action gives no new information.",
-          },
-          {
-            id: "battery-voltage",
-            label: "Measure the voltage at the battery connector with a multimeter",
-            quality: "ok",
-            feedback: "Useful to know power is arriving, but it doesn't show whether something downstream is shorted.",
-            finding: "Battery voltage is present at the connector.",
-          },
-          {
-            id: "dc-supply",
-            label: "Connect a bench power supply with a low current limit and watch the current before pressing power",
-            quality: "best",
-            feedback: "The current pattern on a bench supply is one of the fastest ways to narrow down a dead phone.",
-            finding: "Current flows the moment the supply is connected, before pressing power.",
-            reading: {
-              label: "Bench supply current",
-              value: "Rises immediately on connection and sits at the current limit you set",
-              reference: "A healthy phone draws no significant current before power is pressed",
-            },
-          },
-        ],
-      },
-      {
-        id: "short",
-        prompt: "Current flows before the power key is pressed. What does that suggest, and what do you do?",
-        choices: [
-          {
-            id: "raise-limit",
-            label: "Raise the current limit until the phone turns on",
-            quality: "unsafe",
-            feedback: "Current before power-on usually means a short. Raising the limit pushes more energy into it and can damage the board further.",
-          },
-          {
-            id: "pmic-rails",
-            label: "Check every PMIC output rail in diode mode",
-            quality: "poor",
-            feedback: "PMIC rails aren't switched on before the power key is pressed, so they can't explain this current. Look at lines that are always live.",
-          },
-          {
-            id: "main-line",
-            label: "Disconnect power and check the main supply line in diode mode",
-            quality: "best",
-            feedback: "The main supply line is live whenever power is connected, so it's the prime suspect for current before power-on.",
-            finding: "The main supply line is shorted to ground.",
-            reading: {
-              label: "Diode mode, main supply line to ground",
-              value: "Near zero: shorted",
-              reference: "Known-good board: clearly not shorted",
-            },
-          },
-        ],
-      },
-      {
-        id: "locate",
-        prompt: "The main supply line is shorted. How do you find the faulty part?",
-        choices: [
-          {
-            id: "replace-pmic",
-            label: "Replace the PMIC",
-            quality: "poor",
-            feedback: "That's an expensive guess. Many components sit on the main supply line. Find the shorted one before replacing anything.",
-          },
-          {
-            id: "thermal",
-            label: "List parts on the line in the boardview, inject a limited current at a safe voltage for that line, and find the warm part with a thermal camera or rosin",
-            quality: "best",
-            feedback: "Current injection with low, line-appropriate limits makes the shorted part warm up so you can see it.",
-            finding: "The charging IC warms up first.",
-            reading: {
-              label: "Thermal camera during limited current injection",
-              value: "Charging IC is the clear hot spot",
-            },
-          },
-          {
-            id: "remove-caps",
-            label: "Remove capacitors on the line one at a time until the short clears",
-            quality: "poor",
-            feedback: "This can work but it's slow, risks damaging pads, and the short may not be a capacitor at all. Locate it first.",
-          },
-        ],
-      },
-      {
-        id: "conclude",
-        prompt: "What is your conclusion and repair plan?",
-        choices: [
-          {
-            id: "battery",
-            label: "The battery is faulty: replace it",
-            quality: "poor",
-            feedback: "You already tried a known-good battery, and the short is on the board.",
-          },
-          {
-            id: "pmic",
-            label: "The PMIC failed: replace it",
-            quality: "poor",
-            feedback: "The hot spot was the charging IC, not the PMIC. Follow the evidence.",
-          },
-          {
-            id: "charging-ic",
-            label: "The charging IC failed short, likely from the charger. Replace it with the correct part, then verify the line, current pattern, charging and boot",
-            quality: "best",
-            feedback: "The evidence chain is complete: current before power-on, a shorted main supply line, and the charging IC as the hot spot. Verifying after the repair proves the fix.",
-          },
-        ],
-      },
-    ],
-    debrief: {
-      rootCause: "In this simulation, the charging IC failed short and pulled the main supply line to ground.",
-      lessons: [
-        "Start with history and cheap checks before any test that could cause damage.",
-        "Current before pressing power points to a short on a line that is always live.",
-        "Confirm a short in diode mode with the board unpowered, then locate it before replacing anything.",
-        "Verify after the repair: no short, normal current pattern, charging and boot.",
-      ],
-    },
-    relatedLessonIds: ["power/dc-power-supply-current-draw", "fundamentals/diode-mode", "power/power-path"],
-    relatedBlocks: ["charging", "pmic"],
-  },
+  deadAfterCharge,
   {
     id: "logo-loop",
     title: "Stuck at the logo",
@@ -207,9 +42,9 @@ export const scenarios: GameScenario[] = [
           },
           {
             id: "firmware",
-            label: "Confirm the exact model, then flash the correct firmware before opening the phone",
+            label: "Confirm the exact model, explain that flashing usually erases user data and get the customer's agreement, then flash the correct firmware",
             quality: "best",
-            feedback: "Firmware is the cheapest cause to rule out, and it doesn't require opening the phone.",
+            feedback: "Firmware is the cheapest cause to rule out, and it doesn't require opening the phone. Flashing usually wipes photos and other data, so the customer must agree first.",
             finding: "Flashing completes, but the phone still loops at the logo.",
           },
         ],
@@ -233,7 +68,7 @@ export const scenarios: GameScenario[] = [
             id: "battery",
             label: "Replace the battery",
             quality: "poor",
-            feedback: "The phone powers up and starts booting every cycle, so the battery is supplying power. Nothing points at it.",
+            feedback: "Not yet. A worn battery can sag under boot load and cause restarts, so it isn't ruled out. But running the phone from a bench supply tests that more cheaply than swapping the battery, and the tool log would tell you more.",
           },
           {
             id: "microscope",
@@ -353,7 +188,7 @@ export const scenarios: GameScenario[] = [
             id: "antenna",
             label: "Replace the Wi-Fi antenna",
             quality: "poor",
-            feedback: "A bad antenna usually gives weak signal, not a greyed-out switch. A greyed switch suggests the Wi-Fi IC isn't starting.",
+            feedback: "A bad antenna usually gives weak signal, not a greyed-out switch. A greyed switch suggests the Wi-Fi IC, or the software that starts it, isn't starting. You've ruled out the simple software causes, so check what the IC needs.",
           },
           {
             id: "supply",
@@ -396,7 +231,7 @@ export const scenarios: GameScenario[] = [
             id: "scope-clock",
             label: "Check the Wi-Fi IC's clock with an oscilloscope",
             quality: "best",
-            feedback: "Power, clock and reset are what an IC needs to start. The clock is next on the list.",
+            feedback: "Power, clock and reset are what an IC needs to start. Power is confirmed; the clock and the reset line are both still open. Here you start with the clock.",
             finding: "There is no clock signal at the Wi-Fi IC.",
             reading: {
               label: "Oscilloscope, Wi-Fi IC clock input",
@@ -437,9 +272,9 @@ export const scenarios: GameScenario[] = [
           },
           {
             id: "crystal-repair",
-            label: "The drop cracked the crystal, so the Wi-Fi IC had no clock. Replace the crystal with the correct part, then verify Wi-Fi and Bluetooth",
+            label: "The cracked crystal is the likely cause. Replace it with the correct part, confirm the clock is now present at the IC, then verify Wi-Fi and Bluetooth",
             quality: "best",
-            feedback: "Every step of the evidence supports this. Verifying both Wi-Fi and Bluetooth confirms the shared IC is working again.",
+            feedback: "Power present, no clock, and a visibly cracked crystal: the evidence points strongly at the crystal. Seeing the clock return after the replacement confirms it. If the clock returns but Wi-Fi still won't start, check the reset line next. Verifying both Wi-Fi and Bluetooth confirms the shared IC is working again.",
           },
           {
             id: "software-again",
@@ -451,15 +286,16 @@ export const scenarios: GameScenario[] = [
       },
     ],
     debrief: {
-      rootCause: "In this simulation, the drop cracked the crystal feeding the Wi-Fi/Bluetooth IC, so the IC had power but no clock.",
+      rootCause: "In this simulation, the drop cracked the crystal feeding the Wi-Fi/Bluetooth IC, so the IC had power but no clock. The clock returning after the crystal was replaced confirmed it.",
       lessons: [
-        "A greyed-out Wi-Fi switch usually means the Wi-Fi IC isn't starting, not a weak antenna.",
-        "An IC needs power, clock and reset. Check them in order.",
+        "A greyed-out Wi-Fi switch suggests the Wi-Fi IC or its software isn't starting, not a weak antenna. Rule out software first.",
+        "An IC needs power, clock and reset. Check each one; finding a fault in one doesn't clear the others.",
         "A multimeter can't confirm a clock. Use an oscilloscope.",
         "Follow a missing signal back to its source before replacing the IC that needs it.",
+        "Confirm the cause after the repair: the clock should be present again before you test Wi-Fi.",
       ],
     },
-    relatedLessonIds: [],
+    relatedLessonIds: ["clocks/crystals-and-oscillators", "clocks/diagnosing-clock-faults"],
     relatedBlocks: ["connectivity", "clock"],
   },
 ];

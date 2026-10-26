@@ -7,9 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "content:check": "tsx scripts/check-content.ts",
     "db:seed-sql": "tsx scripts/generate-seed.ts",
     "db:apply": "tsx --env-file=.env.local scripts/db-apply.ts",
     "db:check": "tsx --env-file=.env.local scripts/db-check.ts",
+    "db:snapshot": "tsx --env-file=.env.local scripts/db-snapshot.ts",
     "db:set-role": "tsx --env-file=.env.local scripts/db-set-role.ts"
   },
   "dependencies": {

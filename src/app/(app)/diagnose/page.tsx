@@ -40,7 +40,7 @@ export default function DiagnosePage() {
                 <Badge>{difficultyLabel[s.difficulty]}</Badge>
                 <Badge>
                   <Footprints aria-hidden className="size-3" />
-                  {s.steps.length} steps
+                  {s.steps.some((st) => st.phase) ? "Guided case · branching" : `${s.steps.length} steps`}
                 </Badge>
               </div>
               <h2 className="font-semibold text-ink group-hover:text-accent">{s.title}</h2>

@@ -1,6 +1,7 @@
 import type { Lesson } from "@/lib/types";
 import { courses } from "./courses";
 import { bootLessons } from "./lessons-boot";
+import { clocksLessons } from "./lessons-clocks";
 import { fundamentalsLessons } from "./lessons-fundamentals";
 import { powerLessons } from "./lessons-power";
 import { plannedLessons } from "./planned";
@@ -19,6 +20,7 @@ export const lessons: Lesson[] = [
   ...fundamentalsLessons,
   ...powerLessons,
   ...bootLessons,
+  ...clocksLessons,
   ...plannedLessons,
 ].sort(
   (a, b) =>

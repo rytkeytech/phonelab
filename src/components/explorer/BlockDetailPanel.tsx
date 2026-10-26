@@ -3,6 +3,7 @@ import type { ChipsetBlock, ChipsetConnection } from "@/lib/types";
 import { connectionsDisclaimer, signalTypes } from "@/data/chipset-conceptual";
 import { Badge } from "@/components/ui/Badge";
 import { BookmarkButton } from "@/components/bookmarks/BookmarkButton";
+import { SourceCitation } from "@/components/research/SourceCitation";
 import { categoryStyles, signalStyles } from "./styles";
 
 type Props = {
@@ -119,6 +120,8 @@ export function BlockDetailPanel({ block, blocksById, connections, onSelect }: P
           {block.caution}
         </p>
       )}
+
+      <SourceCitation claimIds={block.claims} />
 
       <p className="border-t border-line pt-4 text-xs leading-relaxed text-faint">
         General guidance only. Exact rails, values, test points and signal names

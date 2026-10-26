@@ -97,6 +97,7 @@ export const powerLessons: Lesson[] = [
           "Current rises and varies as if booting, then drops and the cycle repeats: a boot loop. Firmware, storage, RAM and power problems can all cause this.",
         ],
       },
+      { type: "diagram", diagram: "current-patterns", caption: "The five patterns as shapes over time. The dashed line marks the power key press. There are no values because normal current differs between models: compare with a known-good phone of the same model." },
       {
         type: "example",
         title: "Worked reasoning (simulated scenario, not a real measurement)",

@@ -44,6 +44,7 @@ export const fundamentalsLessons: Lesson[] = [
           "Power is P = V × I. The heat you feel at a fault is power being turned into heat at that spot.",
         ],
       },
+      { type: "diagram", diagram: "circuit-states", caption: "The same loop three ways. Normal: the load sets the current. Open: a break stops it. Short: a low-resistance path bypasses the load, current rises and the short heats up. Textbook symbols, not a phone circuit." },
       { type: "callout", tone: "tip", title: "Ground is your reference", text: "Most measurements on a phone board are taken relative to ground. Shield frames and screw points are often grounded, but always confirm a ground point on the schematic or boardview for that model." },
     ],
     quiz: [
@@ -98,9 +99,11 @@ export const fundamentalsLessons: Lesson[] = [
           "Current (A / mA): the meter must be placed in series with the circuit. On phone boards, a bench power supply's current display is usually more practical.",
         ],
       },
+      { type: "diagram", diagram: "multimeter", caption: "A generic meter set to DC voltage. Only voltage is measured on a powered board; the other modes need it unpowered. The black lead stays in COM; the red lead moves to the A jack only for current. Dial layouts differ between meters, so check yours." },
       { type: "callout", tone: "caution", title: "Never use resistance, continuity or diode mode on a powered board", text: "In these modes the meter applies its own small voltage. On a powered board the readings are meaningless, and you can damage the meter or the board. Disconnect the battery and charger first." },
       { type: "callout", tone: "caution", title: "Current mode is almost a short circuit", text: "In current mode the meter's input has very low resistance. Placing the probes across a supply shorts it, which can blow the meter's fuse or damage the board. Move the red lead back to the V/Ω jack after measuring current." },
       { type: "heading", text: "Measuring a DC voltage" },
+      { type: "diagram", diagram: "measurement-setup", caption: "Same probe points, different board state. Voltage needs power; resistance, continuity and diode mode need the battery and charger disconnected. Probe orientation for diode mode is covered in the next lesson." },
       {
         type: "example",
         title: "Procedure",
@@ -155,7 +158,7 @@ export const fundamentalsLessons: Lesson[] = [
       "Compare readings correctly against a known-good board",
     ],
     blocks: [
-      { type: "text", text: "Diode mode is the most-used measurement in board repair because it works with the board unpowered. That makes it safe to use on a phone that might have a short, before you risk applying power." },
+      { type: "text", text: "Diode mode is one of the most-used measurements in board repair because it works with the board unpowered. That makes it safe to use on a phone that might have a short, before you risk applying power." },
       { type: "heading", text: "What the meter is doing" },
       { type: "text", text: "In diode mode the meter pushes a small, limited test current and displays the voltage needed to push it. Across a single diode you would see its forward voltage drop. On a phone board you are measuring the combined path through everything connected to that point." },
       { type: "diagram", diagram: "diode-mode", caption: "Conceptual: the meter measures the path between a test point and ground through everything connected to that line." },
@@ -183,7 +186,7 @@ export const fundamentalsLessons: Lesson[] = [
         ],
         note: "Current injection must be done carefully. Keep the voltage and current limits low and suitable for that line according to its schematic. Injecting into the wrong line can damage working components.",
       },
-      { type: "explorer", blockId: "pmic", text: "Most shorts you find this way are on PMIC output rails or the battery supply line. See how they connect in the Chipset Explorer." },
+      { type: "explorer", blockId: "pmic", text: "Supply lines, such as the main supply line and the PMIC's output rails, are where you'll use this test most. See how they connect in the Chipset Explorer." },
     ],
     quiz: [
       {

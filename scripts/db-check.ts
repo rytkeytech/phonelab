@@ -51,6 +51,13 @@ run(async (client) => {
     where table_schema = 'public' and privilege_type = 'TRUNCATE' and grantee in ('anon', 'authenticated')`);
   report(truncate.rows.length === 0, `No browser role can TRUNCATE (TRUNCATE bypasses RLS)${truncate.rows.length ? `: ${truncate.rows.length} grants` : ""}`);
 
-  console.log(problems ? `\n${problems} problem(s) found` : "\nNo problems found");
+  // SECURITY DEFINER functions run with their owner's rights; signed-out visitors must not call them.
+  const definer = await client.query<{ name: string }>(`
+    select p.proname as name from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'EXECUTE')`);
+  report(definer.rows.length === 0, `anon can't execute any SECURITY DEFINER function${definer.rows.length ? `: ${definer.rows.map((r) => r.name).join(", ")}` : ""}`);
+
+  console.log(problems ?`\n${problems} problem(s) found` : "\nNo problems found");
   if (problems) process.exitCode = 1;
 });

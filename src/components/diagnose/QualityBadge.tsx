@@ -10,9 +10,19 @@ const styles: Record<ChoiceQuality, { icon: typeof CheckCircle2; className: stri
   unsafe: { icon: OctagonX, className: "text-red-400 border-red-400/30 bg-red-400/10" },
 };
 
-export function QualityBadge({ quality, showPoints = false }: { quality: ChoiceQuality; showPoints?: boolean }) {
+export function QualityBadge({
+  quality,
+  showPoints = false,
+  points: awarded,
+}: {
+  quality: ChoiceQuality;
+  showPoints?: boolean;
+  /** Points actually awarded, when they differ from the usual for this quality */
+  points?: number;
+}) {
   const { icon: Icon, className } = styles[quality];
-  const { label, points } = choiceScoring[quality];
+  const { label } = choiceScoring[quality];
+  const points = awarded ?? choiceScoring[quality].points;
   return (
     <span className={cx("inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap", className)}>
       <Icon aria-hidden className="size-3.5" />

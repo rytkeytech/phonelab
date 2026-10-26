@@ -39,6 +39,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "A boot ROM that runs first at power-on and can expose an emergency download mode over USB",
     ],
     dependsOn: ["pmic", "clock", "ram", "storage"],
+    claims: ["C-0009"],
     symptoms: [
       "Dead phone with abnormal current draw on a DC power supply",
       "Stuck in boot loop or stops at a fixed point during boot",
@@ -53,7 +54,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
     ],
     caution:
       "SoC reballing or replacement is high-risk and often impossible on modern devices because of security pairing.",
-    box: { x: 380, y: 200, w: 240, h: 220 },
+    box: { x: 320, y: 190, w: 360, h: 260 },
   },
   {
     id: "pmic",
@@ -81,11 +82,12 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Confirm battery supply reaches the PMIC (follow the battery line from the connector using the schematic), and check that line for a short.",
       "Check the power-key line and confirm it changes state when pressed.",
       "Measure each output rail and compare against the schematic or a known-good board of the same model. Never assume a value from another phone.",
-      "In diode mode, compare readings on the rail capacitors with a known-good board to find shorts. A shorted capacitor or load on a rail is more common than a failed PMIC.",
+      "In diode mode, compare readings on the rail capacitors with a known-good board to find shorts. Rule out shorted capacitors and loads on a rail before suspecting the PMIC itself.",
     ],
+    claims: ["C-0007"],
     caution:
       "A dead phone does not automatically mean the PMIC is faulty. A flat or failed battery, a faulty power key, a shorted rail, or a fault elsewhere can produce the same symptom.",
-    box: { x: 40, y: 260, w: 180, h: 110 },
+    box: { x: 40, y: 275, w: 200, h: 90 },
   },
   {
     id: "charging",
@@ -117,7 +119,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Check the protection (OVP) and charging IC areas for liquid damage or shorts.",
       "Check the battery connector lines against the schematic, including the temperature/ID line.",
     ],
-    box: { x: 40, y: 150, w: 180, h: 64 },
+    box: { x: 40, y: 175, w: 200, h: 70 },
   },
   {
     id: "clock",
@@ -139,13 +141,14 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Boots but has no network (RF reference clock problem)",
       "Clock or date resets after power loss",
     ],
+    claims: ["C-0002"],
     diagnosis: [
       "A missing clock and a stuck reset can look the same, because in both cases the board doesn't start. Check each one separately.",
       "Inspect crystals and oscillators for cracks, corrosion or liquid damage.",
       "A multimeter cannot confirm a clock is oscillating correctly. Use an oscilloscope where possible.",
       "Check the reset line's state against the schematic during power-on.",
     ],
-    box: { x: 40, y: 430, w: 180, h: 64 },
+    box: { x: 40, y: 395, w: 200, h: 70 },
   },
   {
     id: "ram",
@@ -175,7 +178,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
     ],
     caution:
       "A memory initialisation error does not prove the RAM is faulty. It can also come from a wrong loader or firmware, a missing or unstable supply, a solder or connection problem between the SoC and RAM, or an SoC fault.",
-    box: { x: 330, y: 520, w: 150, h: 64 },
+    box: { x: 340, y: 530, w: 150, h: 70 },
   },
   {
     id: "storage",
@@ -185,10 +188,11 @@ export const chipsetBlocks: ChipsetBlock[] = [
     summary:
       "Permanent storage for the bootloader, operating system and user data. Flashing failures and boot loops can come from firmware, power, communication or storage faults, so storage is not automatically to blame.",
     functions: [
-      "eMMC on many budget phones, UFS on most mid- and high-end phones",
+      "eMMC or UFS, depending on the model. Budget phones are often said to use eMMC and pricier ones UFS, but check the storage part on the board",
       "Stores boot partitions, OS, and user data",
       "Sometimes combined with RAM in one package (eMCP / uMCP)",
     ],
+    claims: ["C-0008"],
     dependsOn: ["pmic", "soc"],
     symptoms: [
       "Stuck on logo, boot loop, or boots straight into fastboot / download mode",
@@ -203,7 +207,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
     ],
     caution:
       "On many modern devices storage is cryptographically paired with the SoC. Replacement may need device-specific programming or may not be possible, and user data is usually unrecoverable.",
-    box: { x: 520, y: 520, w: 150, h: 64 },
+    box: { x: 510, y: 530, w: 150, h: 70 },
   },
   {
     id: "display",
@@ -230,7 +234,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Only then check the display / backlight supply circuits against the schematic.",
       "Suspect a board-side display IC last, after the screen, connector and supplies are ruled out.",
     ],
-    box: { x: 300, y: 40, w: 160, h: 64 },
+    box: { x: 300, y: 30, w: 130, h: 80 },
   },
   {
     id: "touch",
@@ -256,7 +260,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Inspect and reseat the connector, then check interface lines for continuity using the schematic.",
       "Suspect a board-side touch IC last.",
     ],
-    box: { x: 500, y: 40, w: 160, h: 64 },
+    box: { x: 435, y: 30, w: 130, h: 80 },
   },
   {
     id: "cameras",
@@ -285,7 +289,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
     ],
     caution:
       "On some devices camera modules are paired to the board, so a swapped module may show warnings or lose features.",
-    box: { x: 760, y: 40, w: 180, h: 64 },
+    box: { x: 570, y: 30, w: 130, h: 80 },
   },
   {
     id: "connectivity",
@@ -315,7 +319,7 @@ export const chipsetBlocks: ChipsetBlock[] = [
     ],
     caution:
       "Never alter a device's IMEI. It is illegal in many countries.",
-    box: { x: 760, y: 200, w: 180, h: 64 },
+    box: { x: 760, y: 205, w: 200, h: 80 },
   },
   {
     id: "audio",
@@ -342,48 +346,49 @@ export const chipsetBlocks: ChipsetBlock[] = [
       "Try a known-good speaker or flex, and check speaker / earpiece continuity with a multimeter.",
       "Only then check the amplifier or codec area and its supply against the schematic.",
     ],
-    box: { x: 760, y: 330, w: 180, h: 64 },
+    box: { x: 760, y: 355, w: 200, h: 80 },
   },
 ];
 
-// Shared bus routes keep power lines in the gaps between blocks.
-const pmicTopBus: [number, number][] = [
-  [220, 280],
-  [250, 280],
-  [250, 130],
+// Power reaches the peripherals through two shared trunks that run in the gaps
+// between blocks (left of the SoC, then above or below it), so no line passes behind a box.
+const topTrunk: [number, number][] = [
+  [240, 290],
+  [280, 290],
+  [280, 150],
 ];
-const pmicBottomBus: [number, number][] = [
-  [220, 355],
-  [250, 355],
-  [250, 480],
+const bottomTrunk: [number, number][] = [
+  [240, 355],
+  [280, 355],
+  [280, 490],
 ];
 
 export const chipsetConnections: ChipsetConnection[] = [
   // Power
-  { id: "p-charging-pmic", from: "charging", to: "pmic", type: "power", label: "Battery / charging path to the PMIC (arrangement varies)", points: [[130, 214], [130, 260]] },
-  { id: "p-pmic-soc", from: "pmic", to: "soc", type: "power", label: "SoC supply rails (typically several)", points: [[220, 340], [380, 340]] },
-  { id: "p-pmic-display", from: "pmic", to: "display", type: "power", label: "Display supplies (may come from dedicated ICs)", points: [...pmicTopBus, [340, 130], [340, 104]] },
-  { id: "p-pmic-touch", from: "pmic", to: "touch", type: "power", label: "Touch controller supply", points: [...pmicTopBus, [620, 130], [620, 104]] },
-  { id: "p-pmic-cameras", from: "pmic", to: "cameras", type: "power", label: "Camera module supplies (may include dedicated regulators)", points: [...pmicTopBus, [900, 130], [900, 104]] },
-  { id: "p-pmic-connectivity", from: "pmic", to: "connectivity", type: "power", label: "RF and Wi-Fi supplies (some taken directly from battery power)", points: [...pmicTopBus, [720, 130], [720, 250], [760, 250]] },
-  { id: "p-pmic-audio", from: "pmic", to: "audio", type: "power", label: "Audio codec / amplifier supplies", points: [...pmicTopBus, [720, 130], [720, 380], [760, 380]] },
-  { id: "p-pmic-ram", from: "pmic", to: "ram", type: "power", label: "Memory supply rails", points: [...pmicBottomBus, [360, 480], [360, 520]] },
-  { id: "p-pmic-storage", from: "pmic", to: "storage", type: "power", label: "Storage supply rails", points: [...pmicBottomBus, [640, 480], [640, 520]] },
+  { id: "p-charging-pmic", from: "charging", to: "pmic", type: "power", label: "Battery / charging path to the PMIC (arrangement varies)", points: [[110, 245], [110, 275]] },
+  { id: "p-pmic-soc", from: "pmic", to: "soc", type: "power", label: "SoC supply rails (typically several)", points: [[240, 310], [320, 310]] },
+  { id: "p-pmic-display", from: "pmic", to: "display", type: "power", label: "Display supplies (may come from dedicated ICs)", points: [...topTrunk, [335, 150], [335, 110]] },
+  { id: "p-pmic-touch", from: "pmic", to: "touch", type: "power", label: "Touch controller supply", points: [...topTrunk, [470, 150], [470, 110]] },
+  { id: "p-pmic-cameras", from: "pmic", to: "cameras", type: "power", label: "Camera module supplies (may include dedicated regulators)", points: [...topTrunk, [605, 150], [605, 110]] },
+  { id: "p-pmic-connectivity", from: "pmic", to: "connectivity", type: "power", label: "RF and Wi-Fi supplies (some taken directly from battery power)", points: [...topTrunk, [720, 150], [720, 225], [760, 225]] },
+  { id: "p-pmic-audio", from: "pmic", to: "audio", type: "power", label: "Audio codec / amplifier supplies", points: [...topTrunk, [720, 150], [720, 375], [760, 375]] },
+  { id: "p-pmic-ram", from: "pmic", to: "ram", type: "power", label: "Memory supply rails", points: [...bottomTrunk, [385, 490], [385, 530]] },
+  { id: "p-pmic-storage", from: "pmic", to: "storage", type: "power", label: "Storage supply rails", points: [...bottomTrunk, [555, 490], [555, 530]] },
 
   // Data
-  { id: "d-soc-display", from: "soc", to: "display", type: "data", label: "Display interface (typically MIPI DSI)", points: [[440, 200], [440, 104]] },
-  { id: "d-soc-touch", from: "soc", to: "touch", type: "data", label: "Touch data (commonly I²C or SPI + interrupt)", points: [[560, 200], [560, 104]] },
-  { id: "d-soc-cameras", from: "soc", to: "cameras", type: "data", label: "Camera interface (typically MIPI CSI)", points: [[600, 200], [600, 165], [840, 165], [840, 104]] },
-  { id: "d-soc-connectivity", from: "soc", to: "connectivity", type: "data", label: "Baseband, RF and Wi-Fi links (vary by platform)", points: [[620, 225], [760, 225]] },
-  { id: "d-soc-audio", from: "soc", to: "audio", type: "data", label: "Digital audio (e.g., I²S/TDM or vendor-specific)", points: [[620, 360], [760, 360]] },
-  { id: "d-soc-ram", from: "soc", to: "ram", type: "data", label: "LPDDR memory bus", points: [[420, 420], [420, 520]] },
-  { id: "d-soc-storage", from: "soc", to: "storage", type: "data", label: "eMMC or UFS interface", points: [[580, 420], [580, 520]] },
+  { id: "d-soc-display", from: "soc", to: "display", type: "data", label: "Display interface (typically MIPI DSI)", points: [[365, 190], [365, 110]] },
+  { id: "d-soc-touch", from: "soc", to: "touch", type: "data", label: "Touch data (commonly I²C or SPI + interrupt)", points: [[500, 190], [500, 110]] },
+  { id: "d-soc-cameras", from: "soc", to: "cameras", type: "data", label: "Camera interface (typically MIPI CSI)", points: [[635, 190], [635, 110]] },
+  { id: "d-soc-connectivity", from: "soc", to: "connectivity", type: "data", label: "Baseband, RF and Wi-Fi links (vary by platform)", points: [[680, 260], [760, 260]] },
+  { id: "d-soc-audio", from: "soc", to: "audio", type: "data", label: "Digital audio (e.g., I²S/TDM or vendor-specific)", points: [[680, 410], [760, 410]] },
+  { id: "d-soc-ram", from: "soc", to: "ram", type: "data", label: "LPDDR memory bus", points: [[415, 450], [415, 530]] },
+  { id: "d-soc-storage", from: "soc", to: "storage", type: "data", label: "eMMC or UFS interface", points: [[585, 450], [585, 530]] },
 
   // Control
-  { id: "c-soc-pmic", from: "soc", to: "pmic", type: "control", label: "PMIC control bus (platform-dependent, e.g., SPMI or I²C)", points: [[380, 300], [220, 300]] },
-  { id: "c-soc-charging", from: "soc", to: "charging", type: "control", label: "Charging IC control (commonly I²C)", points: [[380, 230], [300, 230], [300, 182], [220, 182]] },
+  { id: "c-soc-pmic", from: "soc", to: "pmic", type: "control", label: "PMIC control bus (platform-dependent, e.g., SPMI or I²C)", points: [[320, 340], [240, 340]] },
+  { id: "c-soc-charging", from: "soc", to: "charging", type: "control", label: "Charging IC control (commonly I²C)", points: [[320, 210], [240, 210]] },
 
   // Clock & reset
-  { id: "k-clock-pmic", from: "clock", to: "pmic", type: "clock", label: "Sleep / RTC clock and reset relationship (varies by platform)", points: [[130, 430], [130, 370]] },
-  { id: "k-clock-soc", from: "clock", to: "soc", type: "clock", label: "Reference clock and reset release (separate signals)", points: [[220, 462], [300, 462], [300, 400], [380, 400]] },
+  { id: "k-clock-pmic", from: "clock", to: "pmic", type: "clock", label: "Sleep / RTC clock and reset relationship (varies by platform)", points: [[110, 395], [110, 365]] },
+  { id: "k-clock-soc", from: "clock", to: "soc", type: "clock", label: "Reference clock and reset release (separate signals)", points: [[240, 430], [320, 430]] },
 ];

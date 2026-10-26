@@ -46,12 +46,6 @@ export const plannedLessons: Lesson[] = [
     [5, "boot-loop-diagnosis", "Diagnosing boot loops", "Separating firmware, power, storage and RAM causes.", 14, "advanced"],
     [6, "firmware-vs-hardware", "Firmware fault or hardware fault?", "Tests that separate software problems from board faults.", 10, "intermediate"],
   ]),
-  ...planned("clocks", [
-    [1, "crystals-and-oscillators", "Crystals and oscillators", "How phones generate timing signals.", 10, "intermediate"],
-    [2, "rtc-and-sleep-clock", "The RTC and sleep clock", "Why the sleep clock matters for power-on.", 8, "intermediate"],
-    [3, "reset-signals", "Reset signals", "Power-on reset, watchdogs and peripheral resets.", 10, "intermediate"],
-    [4, "diagnosing-clock-faults", "Diagnosing clock and reset faults", "What you can and can't check without an oscilloscope.", 12, "advanced"],
-  ]),
   ...planned("memory", [
     [1, "lpddr-basics", "LPDDR RAM basics", "What RAM does during boot and while running.", 10, "intermediate"],
     [2, "emmc-vs-ufs", "eMMC vs UFS storage", "Two storage types and how they differ for repair.", 10, "intermediate"],

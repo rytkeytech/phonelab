@@ -38,6 +38,8 @@ export type ChipsetBlock = {
   diagnosis: string[];
   /** Extra caution shown in the detail panel, if any */
   caution?: string;
+  /** Research claims (ids from src/data/research/claims.ts) behind statements in this block */
+  claims?: string[];
   /** Position in the SVG viewBox */
   box: { x: number; y: number; w: number; h: number };
 };
@@ -63,17 +65,71 @@ export type Course = {
 };
 
 /** Diagrams that lesson content can embed by id. */
-export type LessonDiagramId = "power-path" | "boot-sequence" | "diode-mode";
+export type LessonDiagramId =
+  | "power-path"
+  | "boot-sequence"
+  | "diode-mode"
+  | "circuit-states"
+  | "multimeter"
+  | "measurement-setup"
+  | "current-patterns"
+  | "crystal-oscillator"
+  | "rtc-divider"
+  | "reset-timing"
+  | "watchdog"
+  | "clock-fault-flow";
 
-/** One piece of lesson content. Lessons are an ordered list of these. */
-export type LessonBlock =
+/**
+ * One piece of lesson content. Lessons are an ordered list of these.
+ * `claims` lists research claim ids that back the block; each is cited right under it.
+ */
+export type LessonBlock = (
   | { type: "heading"; text: string }
   | { type: "text"; text: string }
   | { type: "list"; items: string[]; ordered?: boolean }
   | { type: "callout"; tone: "key" | "tip" | "caution"; title: string; text: string }
   | { type: "example"; title: string; steps: string[]; note?: string }
   | { type: "diagram"; diagram: LessonDiagramId; caption: string }
-  | { type: "explorer"; blockId: string; text: string };
+  | { type: "explorer"; blockId: string; text: string }
+) & { claims?: string[] };
+
+// ---- Research (see docs/research/) ----
+
+/** How a claim is supported. */
+export type EvidenceType = "direct-source" | "corroborated" | "engineering-inference" | "general-principle";
+
+/** Source priority from the research rules: 1 (manufacturer service docs) to 7 (standard references). */
+export type SourceTier = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export type ResearchSource = {
+  /** "S-0001" */
+  id: string;
+  title: string;
+  publisher: string;
+  /** URL or document number */
+  location: string;
+  tier: SourceTier;
+  /** Whether the document was actually read, and when */
+  access: { status: "read" | "unavailable"; date: string; note?: string };
+};
+
+export type ResearchClaim = {
+  /** "C-0001" */
+  id: string;
+  statement: string;
+  /** Sources that were read and support the claim, with page/section/figure */
+  sources: { sourceId: string; locator: string }[];
+  /** Device model and board revision, or "General principle" */
+  appliesTo: string;
+  /** What the sources actually establish (may be less than the statement) */
+  establishes: string;
+  evidence: EvidenceType;
+  confidence: ConfidenceLevel;
+  researched: string;
+  limitations: string;
+  /** Open question in docs/research/OPEN_QUESTIONS.md, while unresolved */
+  questionId?: string;
+};
 
 export type QuizQuestion = {
   id: string;
@@ -191,12 +247,47 @@ export type GameChoice = {
   /** What the technician learns from doing it (simulated) */
   finding?: string;
   reading?: SimulatedReading;
+  /** Step to go to when this choice moves the case on: a step id, or "end". Default: the next step in the list. */
+  next?: string;
+  /** For interpretation steps: what the evidence so far does and doesn't show */
+  interpretation?: {
+    supports: string;
+    doesNotProve: string;
+    /** Causes still possible after this result */
+    remaining: string[];
+  };
 };
+
+/** The stages of a guided case, in order. Shown as the progress indicator. */
+export type CasePhase =
+  | "case"
+  | "inspection"
+  | "first-test"
+  | "interpret"
+  | "circuit"
+  | "next-decision"
+  | "confirmation"
+  | "repair"
+  | "verification"
+  | "review";
 
 export type GameStep = {
   id: string;
+  /** Which stage of the case this step belongs to. Older linear scenarios leave it out. */
+  phase?: CasePhase;
+  /** Background shown above the question (what's on the bench, what the last test showed) */
+  context?: string;
   /** The situation and question at this step */
   prompt: string;
+  /** Optional nudge. Revealing it costs a couple of points. */
+  hint?: string;
+  /**
+   * A detour off the best path. Choices still get feedback and unsafe ones still
+   * lose points, but nothing here adds points, so a longer route can't outscore the best one.
+   */
+  unscored?: boolean;
+  /** Circuit view for this step. Always labelled with its mode. */
+  circuit?: { mode: "conceptual"; diagram: LessonDiagramId; caption: string };
   choices: GameChoice[];
 };
 
@@ -210,10 +301,18 @@ export type GameScenario = {
   brief: string;
   /** Describes the simulated device without claiming to be a real model */
   device: string;
+  /** "documented" only when a source shows the repair really happened. Default: simulated. */
+  kind?: "simulated" | "documented";
+  /** What the technician sees on first look, before any test */
+  observations?: string[];
   steps: GameStep[];
   debrief: {
     rootCause: string;
     lessons: string[];
+    /** Other causes that could produce the same symptom, and how this case ruled them out */
+    alternatives?: string[];
+    /** Mistakes technicians commonly make on this kind of fault */
+    commonMistakes?: string[];
   };
   relatedLessonIds: string[];
   relatedBlocks: string[];
