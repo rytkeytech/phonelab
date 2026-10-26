@@ -2,6 +2,7 @@ import { ArrowRight, MousePointerClick, TriangleAlert } from "lucide-react";
 import type { ChipsetBlock, ChipsetConnection } from "@/lib/types";
 import { connectionsDisclaimer, signalTypes } from "@/data/chipset-conceptual";
 import { Badge } from "@/components/ui/Badge";
+import { BookmarkButton } from "@/components/bookmarks/BookmarkButton";
 import { categoryStyles, signalStyles } from "./styles";
 
 type Props = {
@@ -33,6 +34,9 @@ export function BlockDetailPanel({ block, blocksById, connections, onSelect }: P
         <Badge className="mb-2">{categoryStyles[block.category].label}</Badge>
         <h2 className="text-lg font-semibold text-ink">{block.name}</h2>
         <p className="mt-1.5 text-sm leading-relaxed text-muted">{block.summary}</p>
+        <div className="mt-3">
+          <BookmarkButton kind="block" itemId={block.id} returnTo={`/explorer?block=${block.id}`} />
+        </div>
       </header>
 
       <Section title="What it does">

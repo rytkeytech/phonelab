@@ -10,6 +10,7 @@ import {
   publishedLessons,
 } from "@/data/learning";
 import { Badge } from "@/components/ui/Badge";
+import { BookmarkButton } from "@/components/bookmarks/BookmarkButton";
 import { CompleteLessonButton } from "@/components/learn/CompleteLessonButton";
 import { KnowledgeCheck } from "@/components/learn/KnowledgeCheck";
 import { LessonContent } from "@/components/learn/LessonContent";
@@ -57,6 +58,9 @@ export default async function LessonPage({ params }: Props) {
             {lesson.minutes} min
           </Badge>
           <Badge>{difficultyLabel[lesson.difficulty]}</Badge>
+        </div>
+        <div className="mt-4">
+          <BookmarkButton kind="lesson" itemId={lesson.id} returnTo={lessonHref(lesson)} />
         </div>
       </header>
 

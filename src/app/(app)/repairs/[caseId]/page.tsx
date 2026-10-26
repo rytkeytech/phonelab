@@ -8,6 +8,7 @@ import { getPublishedCases } from "@/lib/repair-cases";
 import { findRepairCase } from "@/lib/repository";
 import { PublicCaseMedia } from "@/components/repairs/PublicCaseMedia";
 import { chipsetBlocks } from "@/data/chipset-conceptual";
+import { BookmarkButton } from "@/components/bookmarks/BookmarkButton";
 import { Badge } from "@/components/ui/Badge";
 import { ConfidenceBadge, confidenceInfo } from "@/components/ui/ConfidenceBadge";
 import { Notice } from "@/components/ui/Notice";
@@ -66,6 +67,9 @@ export default async function RepairCasePage({ params }: Props) {
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">{c.title}</h1>
         <p className="mt-2 max-w-3xl text-muted">{c.summary}</p>
+        <div className="mt-3">
+          <BookmarkButton kind="case" itemId={c.id} returnTo={`/repairs/${c.id}`} />
+        </div>
       </header>
 
       {c.isSample && (
