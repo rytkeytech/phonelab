@@ -1,17 +1,36 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cx } from "@/lib/utils";
 import { navItems } from "./nav-items";
 
-function isActive(pathname: string, href: string) {
+type Props = { onNavigate?: () => void };
+
+function isActive(pathname: string | null, href: string) {
+  if (pathname === null) return false;
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
+/**
+ * Main navigation. On pages whose URL is only known at request time (e.g.
+ * /admin/cases/[id]) the links render first without the "current page"
+ * highlight, which appears once the URL is known.
+ */
+export function NavLinks(props: Props) {
+  return (
+    <Suspense fallback={<NavList {...props} pathname={null} />}>
+      <CurrentNavList {...props} />
+    </Suspense>
+  );
+}
 
+function CurrentNavList(props: Props) {
+  return <NavList {...props} pathname={usePathname()} />;
+}
+
+function NavList({ onNavigate, pathname }: Props & { pathname: string | null }) {
   return (
     <ul className="flex flex-col gap-1">
       {navItems.map(({ href, label, icon: Icon }) => {

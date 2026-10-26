@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { UserRound } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
+import { ClipboardCheck, FolderOpen, UserRound } from "lucide-react";
+import { getCurrentUser, isStaff } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Badge } from "@/components/ui/Badge";
 import { SignOutButton } from "./SignOutButton";
@@ -45,7 +45,19 @@ export async function AccountPanel() {
           {user.displayName && <p className="truncate text-xs text-faint">{user.email}</p>}
         </div>
       </div>
-      <div className="mt-2.5 flex items-center justify-between">
+      <nav aria-label="Account" className="mt-2.5 flex flex-col gap-0.5 border-t border-line pt-2">
+        <Link href="/repairs/mine" className="flex items-center gap-2 rounded-md px-1.5 py-1 text-xs text-muted hover:bg-surface hover:text-ink">
+          <FolderOpen aria-hidden className="size-3.5" />
+          My submissions
+        </Link>
+        {isStaff(user) && (
+          <Link href="/admin" className="flex items-center gap-2 rounded-md px-1.5 py-1 text-xs text-muted hover:bg-surface hover:text-ink">
+            <ClipboardCheck aria-hidden className="size-3.5" />
+            Review queue
+          </Link>
+        )}
+      </nav>
+      <div className="mt-2 flex items-center justify-between">
         <Badge tone={user.role === "member" ? "neutral" : "accent"}>{roleLabel[user.role]}</Badge>
         <SignOutButton />
       </div>

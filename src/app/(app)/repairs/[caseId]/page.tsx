@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Cpu } from "lucide-react";
-import { faultCategoryLabel, getRepairCase, platformNames, repairCases } from "@/data/repairs";
+import { faultCategoryLabel, platformNames, sampleRepairCases } from "@/data/repairs";
+import { getPublishedCases } from "@/lib/repair-cases";
+import { findRepairCase } from "@/lib/repository";
+import { PublicCaseMedia } from "@/components/repairs/PublicCaseMedia";
 import { chipsetBlocks } from "@/data/chipset-conceptual";
 import { Badge } from "@/components/ui/Badge";
 import { ConfidenceBadge, confidenceInfo } from "@/components/ui/ConfidenceBadge";
@@ -18,18 +22,20 @@ import {
 
 type Props = PageProps<"/repairs/[caseId]">;
 
-export function generateStaticParams() {
-  return repairCases.map((c) => ({ caseId: c.id }));
+export async function generateStaticParams() {
+  const cases = [...sampleRepairCases, ...(await getPublishedCases())];
+  return cases.map((c) => ({ caseId: c.id }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const found = getRepairCase((await params).caseId);
-  return found ? { title: found.title, description: found.summary } : { title: "Case not found" };
+  const found = await findRepairCase((await params).caseId);
+  return found ? { title: found.repairCase.title, description: found.repairCase.summary } : { title: "Case not found" };
 }
 
 export default async function RepairCasePage({ params }: Props) {
-  const c = getRepairCase((await params).caseId);
-  if (!c) notFound();
+  const found = await findRepairCase((await params).caseId);
+  if (!found) notFound();
+  const { repairCase: c, rowId } = found;
 
   const related = chipsetBlocks.filter((b) => c.relatedBlocks.includes(b.id));
   const device: [string, string][] = [
@@ -104,7 +110,13 @@ export default async function RepairCasePage({ params }: Props) {
           </CaseSection>
 
           <CaseSection step={8} title="Images and evidence">
-            <MediaGallery media={c.media} />
+            {rowId ? (
+              <Suspense fallback={<p className="text-sm text-faint">Loading photos…</p>}>
+                <PublicCaseMedia caseRowId={rowId} />
+              </Suspense>
+            ) : (
+              <MediaGallery media={c.media} />
+            )}
           </CaseSection>
 
           <CaseSection step={9} title="Sources">

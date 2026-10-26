@@ -1,5 +1,5 @@
 import { scenarios } from "@/data/diagnose";
-import { getLatestRepairCases } from "@/data/repairs";
+import { getLatestRepairCases } from "@/lib/repository";
 import { courses, getCourse, getCourseLessons, lessonHref, publishedLessons } from "@/data/learning";
 import { Badge } from "@/components/ui/Badge";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -16,7 +16,7 @@ import {
   type LessonLink,
 } from "@/components/dashboard/DashboardLearning";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   const courseSummaries: CourseSummary[] = courses.map((course) => {
     const lessons = getCourseLessons(course.id);
     return {
@@ -78,7 +78,7 @@ export default function DashboardPage() {
           <div className="mb-2">
             <Badge tone="caution">Sample data</Badge>
           </div>
-          <RepairCaseList cases={getLatestRepairCases(3)} />
+          <RepairCaseList cases={await getLatestRepairCases(3)} />
         </Panel>
       </div>
 

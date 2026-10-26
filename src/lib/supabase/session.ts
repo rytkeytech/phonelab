@@ -4,11 +4,12 @@ import { isSupabaseConfigured, supabasePublishableKey, supabaseUrl } from "./con
 
 /**
  * Refreshes the signed-in user's session cookie before the page renders.
- * Called from proxy.ts on every page request.
+ * Called from proxy.ts on every page request. Also reports whether someone
+ * is signed in, so proxy.ts can protect member-only pages.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-  if (!isSupabaseConfigured) return response;
+  if (!isSupabaseConfigured) return { response, signedIn: false };
 
   const supabase = createServerClient(supabaseUrl, supabasePublishableKey, {
     cookies: {
@@ -26,7 +27,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Validates the session and refreshes it if it has expired.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
 
-  return response;
+  return { response, signedIn: Boolean(data?.claims?.sub) };
 }

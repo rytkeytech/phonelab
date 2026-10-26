@@ -9,7 +9,8 @@ import { updateSession } from "@/lib/supabase/session";
  *    once rendering starts the status is already 200; checking here first
  *    lets missing lessons and scenarios answer with a proper 404.
  * 2. Forwards stray sign-in email links to /auth/callback.
- * 3. Refreshes the Supabase session cookie.
+ * 3. Refreshes the Supabase session cookie, and sends signed-out visitors
+ *    of member-only pages to sign in first.
  */
 
 const knownPaths = new Set([
@@ -25,6 +26,8 @@ function isUnknownContentPath(pathname: string) {
     (segments[0] === "learn" && segments.length >= 2) || (segments[0] === "diagnose" && segments.length >= 2);
   return isContentDetail && !knownPaths.has(path);
 }
+
+const membersOnly = ["/repairs/submit", "/repairs/mine", "/admin"];
 
 export async function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
@@ -42,7 +45,13 @@ export async function proxy(request: NextRequest) {
     // Rewriting to a path with no route renders the not-found page with a 404 status.
     return NextResponse.rewrite(new URL("/_page-not-found", request.url));
   }
-  return updateSession(request);
+  const { response, signedIn } = await updateSession(request);
+  if (!signedIn && membersOnly.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    const login = new URL("/login", request.url);
+    login.searchParams.set("next", pathname);
+    return NextResponse.redirect(login);
+  }
+  return response;
 }
 
 export const config = {
