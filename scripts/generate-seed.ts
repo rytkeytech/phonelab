@@ -57,6 +57,9 @@ const sql = [
     ]),
     "id",
   ),
+  // Planned lessons have no page or progress, so renamed ones are simply dropped.
+  `delete from public.lessons where status = 'planned' and id not in (${lessons.map((l) => text(l.id)).join(", ")});`,
+  "",
   upsert(
     "quizzes",
     ["lesson_id", "questions"],

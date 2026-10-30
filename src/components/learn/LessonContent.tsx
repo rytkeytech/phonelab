@@ -92,11 +92,11 @@ function Block({ block }: { block: LessonBlock }) {
       );
 
     case "diagram": {
-      const { Diagram, kind } = lessonDiagrams[block.diagram];
+      const { Diagram, kind, source } = lessonDiagrams[block.diagram];
       return (
         <figure className="rounded-xl border border-line bg-surface p-4 sm:p-6">
           <p className="mb-3 font-mono text-[11px] tracking-wider text-faint uppercase">
-            {diagramKindLabel[kind]} · not a schematic of any specific phone
+            {diagramKindLabel[kind]} · {source ?? "not a schematic of any specific phone"}
           </p>
           <Diagram />
           <figcaption className="mt-4 flex gap-2 text-xs leading-relaxed text-muted">

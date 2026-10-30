@@ -77,7 +77,20 @@ export type LessonDiagramId =
   | "rtc-divider"
   | "reset-timing"
   | "watchdog"
-  | "clock-fault-flow";
+  | "clock-fault-flow"
+  | "resistor-jobs"
+  | "resistor-marking"
+  | "series-parallel"
+  | "parallel-on-board"
+  | "voltage-divider"
+  | "key-ladder"
+  | "logic-levels"
+  | "pull-resistors"
+  | "open-drain-bus"
+  | "ldo-block"
+  | "ldo-dropout"
+  | "ldo-fault-flow"
+  | "crystal-circuit";
 
 /**
  * One piece of lesson content. Lessons are an ordered list of these.

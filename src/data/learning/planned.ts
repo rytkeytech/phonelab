@@ -26,18 +26,18 @@ function planned(courseId: string, outline: Outline[]): Lesson[] {
 
 export const plannedLessons: Lesson[] = [
   ...planned("fundamentals", [
-    [4, "capacitors", "Capacitors and why they short", "What capacitors do on a phone board and how they fail.", 10, "beginner"],
-    [5, "inductors-and-coils", "Inductors and coils", "Where inductors appear in power circuits and how to check them.", 8, "beginner"],
-    [6, "diodes-and-protection", "Diodes and protection parts", "Diodes, TVS and ESD protection: what they guard against.", 10, "beginner"],
-    [7, "transistors-and-mosfets", "Transistors and MOSFETs as switches", "How switching components turn loads on and off.", 12, "intermediate"],
-    [8, "reading-schematics-and-boardviews", "Reading schematics and boardviews", "Finding a line, its components and its test points.", 14, "intermediate"],
+    [9, "capacitors", "Capacitors and why they short", "What capacitors do on a phone board and how they fail.", 10, "beginner"],
+    [10, "inductors-and-coils", "Inductors and coils", "Where inductors appear in power circuits and how to check them.", 8, "beginner"],
+    [11, "diodes-and-protection", "Diodes and protection parts", "Diodes, TVS and ESD protection: what they guard against.", 10, "beginner"],
+    [12, "transistors-and-mosfets", "Transistors and MOSFETs as switches", "How switching components turn loads on and off.", 12, "intermediate"],
+    [13, "reading-schematics-and-boardviews", "Reading schematics and boardviews", "Finding a line, its components and its test points.", 14, "intermediate"],
   ]),
   ...planned("power", [
-    [3, "buck-converters-and-ldos", "Buck converters and LDOs", "How the PMIC makes each rail, and what failure looks like.", 12, "intermediate"],
-    [4, "charging-circuits", "Charging circuits", "The USB input path, protection and the charging IC.", 12, "intermediate"],
-    [5, "finding-shorts-on-rails", "Finding shorts on rails", "Locating a shorted component safely and efficiently.", 14, "intermediate"],
-    [6, "power-key-and-power-on", "The power key and power-on trigger", "How a key press reaches the PMIC.", 8, "beginner"],
-    [7, "battery-connector-and-protection", "Battery connector and protection", "Battery lines, temperature/ID and protection circuits.", 10, "intermediate"],
+    [4, "buck-converters", "Buck converters", "How switching regulators make the high-current rails, and what failure looks like.", 12, "intermediate"],
+    [5, "charging-circuits", "Charging circuits", "The USB input path, protection and the charging IC.", 12, "intermediate"],
+    [6, "finding-shorts-on-rails", "Finding shorts on rails", "Locating a shorted component safely and efficiently.", 14, "intermediate"],
+    [7, "power-key-and-power-on", "The power key and power-on trigger", "How a key press reaches the PMIC.", 8, "beginner"],
+    [8, "battery-connector-and-protection", "Battery connector and protection", "Battery lines, temperature/ID and protection circuits.", 10, "intermediate"],
   ]),
   ...planned("boot", [
     [2, "boot-rom-and-download-modes", "Boot ROM and download modes", "What emergency USB modes tell you about the board.", 10, "intermediate"],

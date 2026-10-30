@@ -4,6 +4,7 @@ import { bootLessons } from "./lessons-boot";
 import { clocksLessons } from "./lessons-clocks";
 import { fundamentalsLessons } from "./lessons-fundamentals";
 import { powerLessons } from "./lessons-power";
+import { resistorLessons } from "./lessons-resistors";
 import { plannedLessons } from "./planned";
 
 /*
@@ -18,6 +19,7 @@ const courseOrder = new Map(courses.map((c) => [c.id, c.order]));
 /** Every lesson in curriculum order: by course, then by lesson order. */
 export const lessons: Lesson[] = [
   ...fundamentalsLessons,
+  ...resistorLessons,
   ...powerLessons,
   ...bootLessons,
   ...clocksLessons,

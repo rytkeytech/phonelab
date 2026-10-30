@@ -11,46 +11,46 @@ Statuses: `Open`, `Researching`, `Source unavailable`, `Conflicting evidence`, `
 ## Q-0001: What sleep / RTC clock frequency do phone PMICs use?
 - **Why it matters:** The Clocks lessons and the Chipset Explorer say "typically 32.768 kHz" (claim C-0002).
 - **Concerns:** PMICs across all platforms.
-- **Sources checked:** none yet.
-- **Evidence so far:** none. C-0001 (2¹⁵ = 32,768) is arithmetic and doesn't say what phones use.
+- **Sources checked:** S-0010 (PinePhone v1.2b schematic), S-0011 (AXP803 datasheet).
+- **Evidence so far:** one phone. The PinePhone has a 32.768 kHz crystal, X500, on the A64 SoC. C-0001 (2¹⁵ = 32,768) is arithmetic and doesn't say what phones use.
 - **Conflicts:** none known.
-- **Missing:** a publicly available datasheet for any phone PMIC, or a legitimately published schematic, showing the sleep-clock crystal or frequency.
-- **Next action:** look for public PMIC datasheets (some vendors publish product briefs) and for openly licensed phone hardware (e.g. open-hardware phone projects).
+- **Missing:** more published designs, ideally from mainstream platforms. One open-hardware phone can't support "typically".
+- **Next action:** check other published schematics, such as the Librem 5.
 - **Status:** Open
-- **Last reviewed:** 2026-10-26
+- **Last reviewed:** 2026-10-30
 
 ## Q-0002: How does probing affect a crystal oscillator, and how should a technician measure it?
 - **Why it matters:** Lesson "Diagnosing clock and reset faults" says probe capacitance can shift or stop a crystal, and recommends a 10× probe or a buffered output (C-0003). Lesson "Crystals and oscillators" says load capacitance affects frequency (C-0004).
 - **Concerns:** Pierce crystal oscillators in general.
-- **Sources checked:** S-0001 (ST AN2867), S-0002 (Analog Devices / Maxim APP 58), S-0003 (Microchip AN2648). All unavailable on 2026-10-26 (timeouts, refused connection, HTTP 403).
-- **Evidence so far:** none read. A search snippet and an ST community thread suggest AN2867 covers this, but snippets and forums are not evidence.
-- **Conflicts:** none known.
-- **Missing:** the text of AN2867 sections 3.1 and 3.3 and any measurement section, or equivalent vendor notes.
-- **Next action:** retry the downloads from a different network, or ask the project owner to download the PDFs into `docs/research/inbox/` (not committed if their licence forbids redistribution).
-- **Status:** Source unavailable
-- **Last reviewed:** 2026-10-26
+- **Sources checked:** S-0021, S-0022, S-0023 and S-0024 (all read). S-0001, S-0002 and S-0003 are still unavailable, but no longer needed for this question.
+- **Evidence so far:** passive probes add about 10 to 15 pF and can stop a crystal. Use a buffered output, or an active probe under 1 pF on the crystal pins. Load capacitance sets the exact frequency.
+- **Conflicts:** S-0023 allows a 100× probe with AC coupling, while S-0024 rules out all passive probes on the crystal pins. The lessons recommend neither. These sources also corrected the old 10× probe advice.
+- **Missing:** nothing needed for the lessons.
+- **Next action:** none.
+- **Status:** Resolved
+- **Last reviewed:** 2026-10-30
 
 ## Q-0003: What soldering heat limits apply to crystals?
 - **Why it matters:** The lesson says crystals can be damaged by too much heat (C-0005).
 - **Concerns:** crystal parts generally. Limits are per part.
-- **Sources checked:** none yet.
-- **Evidence so far:** none.
+- **Sources checked:** S-0025 (Abracon ABS07) and S-0026 (Epson FC-135, which has no soldering section).
+- **Evidence so far:** ABS07 follows JEDEC J-STD-020: lead-free peak 260 °C for thin packages, up to 30 s near peak, 2 reflow cycles.
 - **Conflicts:** none known.
-- **Missing:** a crystal manufacturer datasheet with a reflow / hand-soldering profile (e.g. an Epson, Abracon, NDK or KDS 32.768 kHz part).
-- **Next action:** fetch one or two public crystal datasheets and record the profile section.
+- **Missing:** limits for hand rework with hot air, and what damage excess heat actually causes.
+- **Next action:** look for a crystal maker's handling or assembly notes.
 - **Status:** Open
-- **Last reviewed:** 2026-10-26
+- **Last reviewed:** 2026-10-30
 
 ## Q-0004: Which platforms derive the sleep clock without a crystal, and which PMICs need it to finish power-on?
 - **Why it matters:** The RTC lesson says both happen "on some designs" (C-0006).
 - **Concerns:** specific PMICs; not identified.
-- **Sources checked:** none yet.
-- **Evidence so far:** none.
-- **Conflicts:** none known.
+- **Sources checked:** S-0010, S-0011.
+- **Evidence so far:** indirect only. On the PinePhone the crystal is on the SoC, and a search of the AXP803 datasheet found no crystal or 32 kHz pin, so that PMIC isn't the sleep-clock source there.
+- **Conflicts:** the RTC lesson says the sleep clock is part of the PMIC "on many designs". That remains unproven, and the PinePhone is a counter-example.
 - **Missing:** PMIC documentation naming parts and their sleep-clock options.
 - **Next action:** as Q-0001.
 - **Status:** Open
-- **Last reviewed:** 2026-10-26
+- **Last reviewed:** 2026-10-30
 
 ## Q-0005: Is a shorted capacitor or load really more likely than a failed PMIC on a shorted rail?
 - **Why it matters:** The Chipset Explorer PMIC block used to state this as fact. It now gives it as test-order advice (C-0007, Hypothesis).
@@ -84,6 +84,17 @@ Statuses: `Open`, `Researching`, `Source unavailable`, `Conflicting evidence`, `
 - **Next action:** start with vendor product pages for one current chipset per family; record each as a source with the integration facts it states. Add platform blocks only for facts read in those sources.
 - **Status:** Open
 - **Last reviewed:** 2026-10-26
+
+## Q-0009: How does contamination affect high-value nodes and crystal circuits?
+- **Why it matters:** The voltage divider lesson warns that residue can act like a resistor on high-value lines (C-0017, Hypothesis).
+- **Concerns:** liquid-damaged boards generally: divider nodes, pull-ups and crystal pins.
+- **Sources checked:** S-0021, S-0022, S-0023, S-0024 and S-0025 were searched. None covers contamination.
+- **Evidence so far:** none directly. S-0008 covers metal migration, which needs voltage, water and halogen contamination, but that is about the resistor itself.
+- **Conflicts:** none known.
+- **Missing:** a vendor note on board leakage, or measurements from real liquid-damaged boards.
+- **Next action:** look for 32 kHz crystal layout notes on flux and leakage. PhoneLab's own repair cases could also supply measurements.
+- **Status:** Open
+- **Last reviewed:** 2026-10-30
 
 ## Q-0007: Vendor documentation for Qualcomm EDL and MediaTek BROM download modes
 - **Why it matters:** The SoC block names both modes as a way to separate SoC from storage faults (C-0009).

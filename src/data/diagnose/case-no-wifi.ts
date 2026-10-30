@@ -165,9 +165,9 @@ export const noWifi: GameScenario = {
       choices: [
         {
           id: "scope",
-          label: "Use an oscilloscope with a 10× probe at the IC's clock input, or a buffered clock point if the schematic shows one",
+          label: "Use an oscilloscope at a buffered clock point if the schematic shows one, or a low-capacitance active probe at the crystal",
           quality: "best",
-          feedback: "Only an oscilloscope shows whether the clock is running. The 10× probe adds less load, so it's less likely to disturb the oscillator.",
+          feedback: "Only an oscilloscope shows whether the clock is running. A standard passive probe adds enough capacitance to stop a crystal, so it can make a working clock look dead.",
           finding: "There is no clock signal at the Wi-Fi IC.",
           reading: {
             label: "Oscilloscope, Wi-Fi IC clock input",
@@ -300,6 +300,6 @@ export const noWifi: GameScenario = {
       "Confirm the cause after the repair: the clock should be present again before you test Wi-Fi.",
     ],
   },
-  relatedLessonIds: ["clocks/crystals-and-oscillators", "clocks/diagnosing-clock-faults", "clocks/reset-signals"],
+  relatedLessonIds: ["clocks/crystals-and-oscillators", "clocks/crystals-on-the-board", "clocks/diagnosing-clock-faults", "clocks/reset-signals"],
   relatedBlocks: ["connectivity", "clock"],
 };
